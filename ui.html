@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 16px;
+      }
+      h2 {
+        margin-top: 0;
+        margin-bottom: 6px;
+      }
+      .subtitle {
+        font-size: 12px;
+        color: #555;
+        margin: 0 0 14px;
+        line-height: 1.4;
+      }
+      .divider {
+        height: 1px;
+        background: #eee;
+        margin: 14px 0;
+      }
+      .section {
+        margin-bottom: 14px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 600;
+      }
+      button {
+        padding: 6px 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background: white;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      button:hover {
+        background: #f3f3f3;
+      }
+      button.primary {
+        border-color: #111;
+      }
+      textarea,
+      input[type='text'] {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 8px;
+        font-size: 12px;
+      }
+      #result {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        background: #fafafa;
+        font-size: 12px;
+      }
+      #resultSection {
+        display: none;
+      }
+      .result-summary {
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      .result-field {
+        margin-bottom: 8px;
+      }
+      .result-field textarea {
+        background: #fff;
+      }
+      .accordion {
+        margin-bottom: 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fff;
+      }
+      .accordion summary {
+        cursor: pointer;
+        padding: 8px;
+        font-weight: 600;
+        font-size: 12px;
+      }
+      .accordion-content {
+        padding: 0 8px 8px;
+      }
+      .diff-item {
+        border: 1px solid #eee;
+        border-radius: 6px;
+        padding: 8px;
+        margin-top: 8px;
+        background: #fafafa;
+      }
+      .diff-line-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: #555;
+        margin: 4px 0;
+      }
+      .diff-line {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 12px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 4px;
+        padding: 6px;
+      }
+      .hl-add {
+        background: #e6f7e6;
+        color: #1e7a1e;
+        font-weight: 600;
+      }
+      .hl-del {
+        color: #b42318;
+        text-decoration: line-through;
+        background: #ffecec;
+      }
+      .error {
+        color: #c0392b;
+      }
+      .status {
+        margin-top: 8px;
+        font-size: 11px;
+        color: #555;
+      }
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 12px;
+        transform: translateX(-50%);
+        background: #111;
+        color: #fff;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 12px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        max-width: calc(100% - 24px);
+        z-index: 9999;
+      }
+      .toast.show {
+        opacity: 1;
+      }
+      .toast.error {
+        background: #b42318;
+      }
+      #inputPage {
+        display: block;
+      }
+      #resultPage {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="inputPage">
+      <h2>chAInge.note</h2>
+      <p class="subtitle">Before와 After 텍스트를 비교해 변경 내용을 정리합니다.</p>
+
+      <div class="divider"></div>
+
+      <div class="section">
+        <div class="row">
+          <div class="label">Before</div>
+          <button id="loadBefore">선택한 프레임에서 불러오기</button>
+        </div>
+        <textarea id="before" rows="6" placeholder="Before 텍스트가 여기에 들어와요."></textarea>
+      </div>
+
+      <div class="section">
+        <div class="row">
+          <div class="label">After</div>
+          <button id="loadAfter">선택한 프레임에서 불러오기</button>
+        </div>
+        <textarea id="after" rows="6" placeholder="After 텍스트가 여기에 들어와요."></textarea>
+      </div>
+
+      <div class="section">
+        <div class="row">
+          <div class="label">변경 이유 / 기획 의도 (선택)</div>
+        </div>
+        <textarea
+          id="intent"
+          rows="3"
+          placeholder="직접 입력하세요. 비워두면 요약 시 자동으로 제안 문구를 채워줘요."
+        ></textarea>
+      </div>
+
+      <button class="primary" id="summarize">변경 내용 요약하기</button>
+    </div>
+
+    <div id="resultPage">
+      <div class="row">
+        <h2 style="margin: 0;">결과</h2>
+        <button id="backToInput">이전으로</button>
+      </div>
+      <p class="subtitle">변경 내용을 시각적으로 비교한 결과입니다.</p>
+
+      <div class="divider"></div>
+
+      <div class="section" id="resultSection">
+        <div id="result">
+          <div id="resultSummary" class="result-summary">추가 0건 | 변경 0건 | 삭제 0건</div>
+
+          <details id="addedAccordion" class="accordion">
+            <summary id="addedSummary">추가 0건</summary>
+            <div class="accordion-content">
+              <div id="addedResult"></div>
+            </div>
+          </details>
+
+          <details id="changedAccordion" class="accordion">
+            <summary id="changedSummary">변경 0건</summary>
+            <div class="accordion-content">
+              <div id="changedResult"></div>
+            </div>
+          </details>
+
+          <details id="deletedAccordion" class="accordion">
+            <summary id="deletedSummary">삭제 0건</summary>
+            <div class="accordion-content">
+              <div id="deletedResult"></div>
+            </div>
+          </details>
+
+          <div id="intentField" class="result-field">
+            <div style="margin-bottom: 4px; font-weight: 600;">기획 의도</div>
+            <textarea id="intentResult" rows="3" readonly></textarea>
+          </div>
+
+          <button id="saveToFigma" style="margin-top: 8px; width: 100%;">피그마에 기록하기</button>
+        </div>
+      </div>
+    </div>
+    <div id="toast" class="toast"></div>
+
+    <script>
+      const inputPageEl = document.getElementById('inputPage');
+      const resultPageEl = document.getElementById('resultPage');
+      const beforeEl = document.getElementById('before');
+      const afterEl = document.getElementById('after');
+      const intentEl = document.getElementById('intent');
+      const loadBeforeBtn = document.getElementById('loadBefore');
+      const loadAfterBtn = document.getElementById('loadAfter');
+      const summarizeBtn = document.getElementById('summarize');
+      const backToInputBtn = document.getElementById('backToInput');
+      const saveToFigmaBtn = document.getElementById('saveToFigma');
+      const toastEl = document.getElementById('toast');
+      const resultSummaryEl = document.getElementById('resultSummary');
+      const addedResultEl = document.getElementById('addedResult');
+      const changedResultEl = document.getElementById('changedResult');
+      const deletedResultEl = document.getElementById('deletedResult');
+      const intentResultEl = document.getElementById('intentResult');
+      const addedAccordionEl = document.getElementById('addedAccordion');
+      const changedAccordionEl = document.getElementById('changedAccordion');
+      const deletedAccordionEl = document.getElementById('deletedAccordion');
+      const addedSummaryEl = document.getElementById('addedSummary');
+      const changedSummaryEl = document.getElementById('changedSummary');
+      const deletedSummaryEl = document.getElementById('deletedSummary');
+      const resultSectionEl = document.getElementById('resultSection');
+      let latestResult = null;
+      let toastTimer = null;
+
+      function requestSelectedText(target) {
+        parent.postMessage({ pluginMessage: { type: 'get-selected-text', target } }, '*');
+      }
+
+      function showToast(message, isError = false) {
+        if (!toastEl) return;
+        if (toastTimer) clearTimeout(toastTimer);
+        toastEl.textContent = message;
+        toastEl.classList.toggle('error', isError);
+        toastEl.classList.add('show');
+        toastTimer = setTimeout(() => {
+          toastEl.classList.remove('show');
+        }, 2200);
+      }
+
+      loadBeforeBtn.onclick = () => requestSelectedText('before');
+      loadAfterBtn.onclick = () => requestSelectedText('after');
+      backToInputBtn.onclick = () => {
+        resultPageEl.style.display = 'none';
+        inputPageEl.style.display = 'block';
+      };
+
+      function normalizeLines(text) {
+        return text
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter((l) => l.length > 0);
+      }
+
+      function escapeHtml(text) {
+        return text
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
+      }
+
+      // 단순한 prefix/suffix 기반 하이라이트 (초보자용 간단 버전)
+      function makeInlineDiff(beforeLine, afterLine) {
+        if (beforeLine === afterLine) {
+          return {
+            beforeHtml: escapeHtml(beforeLine),
+            afterHtml: escapeHtml(afterLine),
+          };
+        }
+
+        let start = 0;
+        const minLen = Math.min(beforeLine.length, afterLine.length);
+        while (start < minLen && beforeLine[start] === afterLine[start]) start += 1;
+
+        let endBefore = beforeLine.length - 1;
+        let endAfter = afterLine.length - 1;
+        while (endBefore >= start && endAfter >= start && beforeLine[endBefore] === afterLine[endAfter]) {
+          endBefore -= 1;
+          endAfter -= 1;
+        }
+
+        const beforePrefix = beforeLine.slice(0, start);
+        const beforeChanged = beforeLine.slice(start, endBefore + 1);
+        const beforeSuffix = beforeLine.slice(endBefore + 1);
+
+        const afterPrefix = afterLine.slice(0, start);
+        const afterChanged = afterLine.slice(start, endAfter + 1);
+        const afterSuffix = afterLine.slice(endAfter + 1);
+
+        const beforeHtml =
+          escapeHtml(beforePrefix) +
+          (beforeChanged ? `<span class="hl-del">${escapeHtml(beforeChanged)}</span>` : '') +
+          escapeHtml(beforeSuffix);
+
+        const afterHtml =
+          escapeHtml(afterPrefix) +
+          (afterChanged ? `<span class="hl-add">${escapeHtml(afterChanged)}</span>` : '') +
+          escapeHtml(afterSuffix);
+
+        return { beforeHtml, afterHtml };
+      }
+
+      function summarizeChanges(beforeText, afterText) {
+        const beforeLines = normalizeLines(beforeText);
+        const afterLines = normalizeLines(afterText);
+        const added = [];
+        const changed = [];
+        const deleted = [];
+        const max = Math.max(beforeLines.length, afterLines.length);
+
+        for (let i = 0; i < max; i++) {
+          const beforeLine = beforeLines[i];
+          const afterLine = afterLines[i];
+
+          if (beforeLine !== undefined && afterLine !== undefined) {
+            if (beforeLine !== afterLine) {
+              changed.push({ before: beforeLine, after: afterLine });
+            }
+          } else if (beforeLine === undefined && afterLine !== undefined) {
+            added.push(afterLine);
+          } else if (beforeLine !== undefined && afterLine === undefined) {
+            deleted.push(beforeLine);
+          }
+        }
+
+        return { added, changed, deleted };
+      }
+
+      function polishIntent(intent) {
+        const cleaned = intent.trim().replace(/\s+/g, ' ');
+        if (!cleaned) return '';
+        return `"${cleaned}"를 중심으로 사용 흐름에서 혼동을 줄이고, 핵심 정보를 더 빠르게 이해할 수 있도록 문구를 정리했습니다.`;
+      }
+
+      function makeAutoIntent(addedCount, changedCount, deletedCount) {
+        if (changedCount > 0 && addedCount === 0 && deletedCount === 0) {
+          return '동일한 정보를 더 명확한 표현으로 전달해, 사용자가 빠르게 이해하고 다음 행동을 결정할 수 있도록 문구를 개선했습니다.';
+        }
+        if (addedCount > 0 && deletedCount > 0) {
+          return '핵심 정보는 보강하고 불필요한 표현은 정리해, 전체 안내 흐름이 자연스럽게 이어지도록 구조를 개선했습니다.';
+        }
+        if (addedCount > 0) {
+          return '사용자가 놓치기 쉬운 정보를 보완해, 주요 안내를 처음 읽을 때도 맥락을 쉽게 파악할 수 있도록 개선했습니다.';
+        }
+        if (deletedCount > 0) {
+          return '중복되거나 우선순위가 낮은 문구를 줄여, 중요한 정보가 더 먼저 보이도록 정보 밀도를 조정했습니다.';
+        }
+        return 'Before와 After의 의미 차이가 크지 않아 기존 의도를 유지하면서 문구 일관성만 점검했습니다.';
+      }
+
+      summarizeBtn.onclick = () => {
+        const beforeText = beforeEl.value || '';
+        const afterText = afterEl.value || '';
+        const currentIntent = (intentEl.value || '').trim();
+        inputPageEl.style.display = 'none';
+        resultPageEl.style.display = 'block';
+        resultSectionEl.style.display = 'block';
+
+        const { added, changed, deleted } = summarizeChanges(beforeText, afterText);
+
+        resultSummaryEl.textContent = `추가 ${added.length}건 | 변경 ${changed.length}건 | 삭제 ${deleted.length}건`;
+        addedSummaryEl.textContent = `추가 ${added.length}건`;
+        changedSummaryEl.textContent = `변경 ${changed.length}건`;
+        deletedSummaryEl.textContent = `삭제 ${deleted.length}건`;
+
+        addedAccordionEl.style.display = added.length > 0 ? 'block' : 'none';
+        changedAccordionEl.style.display = changed.length > 0 ? 'block' : 'none';
+        deletedAccordionEl.style.display = deleted.length > 0 ? 'block' : 'none';
+
+        addedAccordionEl.open = added.length > 0;
+        changedAccordionEl.open = changed.length > 0;
+        deletedAccordionEl.open = deleted.length > 0;
+
+        addedResultEl.innerHTML = added
+          .map(
+            (line) => `
+            <div class="diff-item">
+              <div class="diff-line-label">Before</div>
+              <div class="diff-line"></div>
+              <div class="diff-line-label">After</div>
+              <div class="diff-line"><span class="hl-add">${escapeHtml(line)}</span></div>
+            </div>
+          `
+          )
+          .join('');
+
+        changedResultEl.innerHTML = changed
+          .map((item) => {
+            const diff = makeInlineDiff(item.before, item.after);
+            return `
+              <div class="diff-item">
+                <div class="diff-line-label">Before</div>
+                <div class="diff-line">${diff.beforeHtml}</div>
+                <div class="diff-line-label">After</div>
+                <div class="diff-line">${diff.afterHtml}</div>
+              </div>
+            `;
+          })
+          .join('');
+
+        deletedResultEl.innerHTML = deleted
+          .map(
+            (line) => `
+            <div class="diff-item">
+              <div class="diff-line-label">Before</div>
+              <div class="diff-line"><span class="hl-del">${escapeHtml(line)}</span></div>
+              <div class="diff-line-label">After</div>
+              <div class="diff-line"></div>
+            </div>
+          `
+          )
+          .join('');
+
+        const autoIntent = makeAutoIntent(added.length, changed.length, deleted.length);
+        const finalIntent = currentIntent ? polishIntent(currentIntent) : autoIntent;
+        intentResultEl.value = finalIntent;
+
+        latestResult = {
+          summary: resultSummaryEl.textContent,
+          intent: finalIntent,
+          added,
+          changed,
+          deleted,
+        };
+      };
+
+      saveToFigmaBtn.onclick = () => {
+        if (!latestResult) {
+          showToast('먼저 "변경 내용 요약하기"를 눌러 결과를 만들어주세요.', true);
+          return;
+        }
+        showToast('피그마 페이지에 기록하는 중...');
+        parent.postMessage({ pluginMessage: { type: 'save-log', payload: latestResult } }, '*');
+      };
+
+      // Figma(코드.ts)에서 보내는 메시지 받기
+      onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (!msg) return;
+
+        if (msg.type === 'save-log-result') {
+          showToast(msg.message || (msg.ok ? '저장 완료' : '저장 실패'), !msg.ok);
+          return;
+        }
+
+        if (msg.type !== 'selected-text') return;
+
+        if (msg.error) {
+          // 결과 영역은 "요약 버튼" 클릭 전까지는 보여주지 않는다.
+          return;
+        }
+
+        if (!msg.texts || msg.texts.length === 0) {
+          // 결과 영역은 "요약 버튼" 클릭 전까지는 보여주지 않는다.
+          return;
+        }
+
+        const text = msg.texts.join('\\n\\n');
+        if (msg.target === 'before') beforeEl.value = text;
+        if (msg.target === 'after') afterEl.value = text;
+      };
+    </script>
+  </body>
+</html>

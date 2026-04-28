@@ -25,6 +25,12 @@
       .section {
         margin-bottom: 14px;
       }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fafafa;
+      }
       .row {
         display: flex;
         align-items: center;
@@ -51,7 +57,8 @@
         border-color: #111;
       }
       textarea,
-      input[type='text'] {
+      input[type='text'],
+      select {
         width: 100%;
         box-sizing: border-box;
         border: 1px solid #ddd;
@@ -134,6 +141,43 @@
         font-size: 11px;
         color: #555;
       }
+      .snapshot-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 180px;
+        overflow: auto;
+      }
+      .snapshot-item {
+        border: 1px solid #e6e6e6;
+        border-radius: 6px;
+        padding: 8px;
+        background: #fff;
+      }
+      .snapshot-title {
+        font-size: 12px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .snapshot-date {
+        color: #999999;
+        font-weight: 400;
+      }
+      .snapshot-meta {
+        font-size: 11px;
+        color: #666;
+        margin-bottom: 4px;
+      }
+      .snapshot-text {
+        font-size: 11px;
+        color: #444;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .empty {
+        color: #777;
+        font-size: 12px;
+      }
       .toast {
         position: fixed;
         left: 50%;
@@ -167,38 +211,52 @@
   <body>
     <div id="inputPage">
       <h2>chAInge.note</h2>
-      <p class="subtitle">Before와 After 텍스트를 비교해 변경 내용을 정리합니다.</p>
+      <p class="subtitle">현재 선택한 프레임의 텍스트를 스냅샷으로 저장하고, 두 스냅샷을 비교해 변경 로그를 남깁니다.</p>
 
       <div class="divider"></div>
 
       <div class="section">
         <div class="row">
-          <div class="label">Before</div>
-          <button id="loadBefore">선택한 프레임에서 불러오기</button>
+          <div class="label">1. 현재 상태 저장</div>
         </div>
-        <textarea id="before" rows="6" placeholder="Before 텍스트가 여기에 들어와요."></textarea>
+        <input
+          id="snapshotMemo"
+          type="text"
+          placeholder="이번 스냅샷 메모를 입력하세요. 예) QA 반영 전, 카피 수정 후"
+        />
+        <button class="primary" id="saveSnapshot" style="margin-top: 8px; width: 100%;">
+          현재 상태 저장
+        </button>
+        <div id="saveStatus" class="status">프레임을 선택한 뒤 저장 버튼을 눌러주세요.</div>
       </div>
 
       <div class="section">
         <div class="row">
-          <div class="label">After</div>
-          <button id="loadAfter">선택한 프레임에서 불러오기</button>
+          <div class="label">2. 저장된 스냅샷 목록 (최근 10개)</div>
+          <button id="refreshSnapshots">새로고침</button>
         </div>
-        <textarea id="after" rows="6" placeholder="After 텍스트가 여기에 들어와요."></textarea>
+        <div class="card">
+          <div id="snapshotList" class="snapshot-list"></div>
+        </div>
       </div>
 
       <div class="section">
         <div class="row">
-          <div class="label">변경 이유 / 기획 의도 (선택)</div>
+          <div class="label">3. 비교할 스냅샷 선택</div>
         </div>
-        <textarea
-          id="intent"
-          rows="3"
-          placeholder="직접 입력하세요. 비워두면 요약 시 자동으로 제안 문구를 채워줘요."
-        ></textarea>
+        <div class="card">
+          <div style="margin-bottom: 8px;">
+            <div class="label" style="margin-bottom: 4px;">Snapshot A</div>
+            <select id="snapshotASelect"></select>
+          </div>
+          <div style="margin-bottom: 8px;">
+            <div class="label" style="margin-bottom: 4px;">Snapshot B</div>
+            <select id="snapshotBSelect"></select>
+          </div>
+        </div>
       </div>
 
-      <button class="primary" id="summarize">변경 내용 요약하기</button>
+      <button class="primary" id="compareBtn">비교</button>
     </div>
 
     <div id="resultPage">
@@ -206,13 +264,15 @@
         <h2 style="margin: 0;">결과</h2>
         <button id="backToInput">이전으로</button>
       </div>
-      <p class="subtitle">변경 내용을 시각적으로 비교한 결과입니다.</p>
+      <p class="subtitle">선택한 두 스냅샷의 텍스트 차이를 비교한 결과입니다.</p>
 
       <div class="divider"></div>
 
       <div class="section" id="resultSection">
         <div id="result">
           <div id="resultSummary" class="result-summary">추가 0건 | 변경 0건 | 삭제 0건</div>
+
+          <div id="snapshotCompareInfo" class="card" style="margin-bottom: 10px;"></div>
 
           <details id="addedAccordion" class="accordion">
             <summary id="addedSummary">추가 0건</summary>
@@ -235,12 +295,7 @@
             </div>
           </details>
 
-          <div id="intentField" class="result-field">
-            <div style="margin-bottom: 4px; font-weight: 600;">기획 의도</div>
-            <textarea id="intentResult" rows="3" readonly></textarea>
-          </div>
-
-          <button id="saveToFigma" style="margin-top: 8px; width: 100%;">피그마에 기록하기</button>
+          <button id="saveToFigma" style="margin-top: 8px; width: 100%;">로그 남기기</button>
         </div>
       </div>
     </div>
@@ -249,20 +304,22 @@
     <script>
       const inputPageEl = document.getElementById('inputPage');
       const resultPageEl = document.getElementById('resultPage');
-      const beforeEl = document.getElementById('before');
-      const afterEl = document.getElementById('after');
-      const intentEl = document.getElementById('intent');
-      const loadBeforeBtn = document.getElementById('loadBefore');
-      const loadAfterBtn = document.getElementById('loadAfter');
-      const summarizeBtn = document.getElementById('summarize');
+      const snapshotMemoEl = document.getElementById('snapshotMemo');
+      const saveSnapshotBtn = document.getElementById('saveSnapshot');
+      const refreshSnapshotsBtn = document.getElementById('refreshSnapshots');
+      const compareBtn = document.getElementById('compareBtn');
       const backToInputBtn = document.getElementById('backToInput');
       const saveToFigmaBtn = document.getElementById('saveToFigma');
       const toastEl = document.getElementById('toast');
+      const saveStatusEl = document.getElementById('saveStatus');
+      const snapshotListEl = document.getElementById('snapshotList');
+      const snapshotASelectEl = document.getElementById('snapshotASelect');
+      const snapshotBSelectEl = document.getElementById('snapshotBSelect');
+      const snapshotCompareInfoEl = document.getElementById('snapshotCompareInfo');
       const resultSummaryEl = document.getElementById('resultSummary');
       const addedResultEl = document.getElementById('addedResult');
       const changedResultEl = document.getElementById('changedResult');
       const deletedResultEl = document.getElementById('deletedResult');
-      const intentResultEl = document.getElementById('intentResult');
       const addedAccordionEl = document.getElementById('addedAccordion');
       const changedAccordionEl = document.getElementById('changedAccordion');
       const deletedAccordionEl = document.getElementById('deletedAccordion');
@@ -271,10 +328,11 @@
       const deletedSummaryEl = document.getElementById('deletedSummary');
       const resultSectionEl = document.getElementById('resultSection');
       let latestResult = null;
+      let snapshots = [];
       let toastTimer = null;
 
-      function requestSelectedText(target) {
-        parent.postMessage({ pluginMessage: { type: 'get-selected-text', target } }, '*');
+      function requestSnapshots() {
+        parent.postMessage({ pluginMessage: { type: 'get-snapshots' } }, '*');
       }
 
       function showToast(message, isError = false) {
@@ -288,8 +346,87 @@
         }, 2200);
       }
 
-      loadBeforeBtn.onclick = () => requestSelectedText('before');
-      loadAfterBtn.onclick = () => requestSelectedText('after');
+      function formatSnapshotDate(isoString) {
+        const date = new Date(isoString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}.${month}.${day} ${hours}:${minutes}`;
+      }
+
+      function makeSnapshotOptionLabel(snapshot) {
+        const primaryLabel = snapshot.memo || snapshot.frameName;
+        return `${primaryLabel} | ${formatSnapshotDate(snapshot.createdAt)}`;
+      }
+
+      function renderSnapshotList() {
+        if (!snapshots.length) {
+          snapshotListEl.innerHTML = '<div class="empty">아직 저장된 스냅샷이 없어요.</div>';
+          return;
+        }
+
+        snapshotListEl.innerHTML = snapshots
+          .map((snapshot) => {
+            const preview = snapshot.texts.join('\n').slice(0, 140);
+            const primaryLabel = snapshot.memo || snapshot.frameName;
+            return `
+              <div class="snapshot-item">
+                <div class="snapshot-title">
+                  ${escapeHtml(primaryLabel)}
+                  <span class="snapshot-date">| ${escapeHtml(formatSnapshotDate(snapshot.createdAt))}</span>
+                </div>
+                <div class="snapshot-meta">${escapeHtml(snapshot.frameName)}</div>
+                <div class="snapshot-text">${escapeHtml(preview)}${
+                  preview.length >= 140 ? '...' : ''
+                }</div>
+              </div>
+            `;
+          })
+          .join('');
+      }
+
+      function renderSnapshotSelects() {
+        const placeholder = '<option value="">스냅샷을 선택하세요</option>';
+        const options = snapshots
+          .map(
+            (snapshot) =>
+              `<option value="${escapeHtml(snapshot.id)}">${escapeHtml(makeSnapshotOptionLabel(snapshot))}</option>`
+          )
+          .join('');
+
+        snapshotASelectEl.innerHTML = placeholder + options;
+        snapshotBSelectEl.innerHTML = placeholder + options;
+
+        if (snapshots.length >= 1) snapshotASelectEl.value = snapshots[0].id;
+        if (snapshots.length >= 2) snapshotBSelectEl.value = snapshots[1].id;
+      }
+
+      function updateSnapshotUI(nextSnapshots) {
+        snapshots = Array.isArray(nextSnapshots) ? nextSnapshots : [];
+        renderSnapshotList();
+        renderSnapshotSelects();
+      }
+
+      saveSnapshotBtn.onclick = () => {
+        saveStatusEl.textContent = '선택한 프레임의 텍스트를 저장하는 중...';
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: 'save-snapshot',
+              memo: snapshotMemoEl.value || '',
+            },
+          },
+          '*'
+        );
+      };
+
+      refreshSnapshotsBtn.onclick = () => {
+        saveStatusEl.textContent = '저장된 스냅샷 목록을 불러오는 중...';
+        requestSnapshots();
+      };
+
       backToInputBtn.onclick = () => {
         resultPageEl.style.display = 'none';
         inputPageEl.style.display = 'block';
@@ -378,32 +515,26 @@
         return { added, changed, deleted };
       }
 
-      function polishIntent(intent) {
-        const cleaned = intent.trim().replace(/\s+/g, ' ');
-        if (!cleaned) return '';
-        return `"${cleaned}"를 중심으로 사용 흐름에서 혼동을 줄이고, 핵심 정보를 더 빠르게 이해할 수 있도록 문구를 정리했습니다.`;
+      function getSnapshotById(snapshotId) {
+        return snapshots.find((snapshot) => snapshot.id === snapshotId) || null;
       }
 
-      function makeAutoIntent(addedCount, changedCount, deletedCount) {
-        if (changedCount > 0 && addedCount === 0 && deletedCount === 0) {
-          return '동일한 정보를 더 명확한 표현으로 전달해, 사용자가 빠르게 이해하고 다음 행동을 결정할 수 있도록 문구를 개선했습니다.';
-        }
-        if (addedCount > 0 && deletedCount > 0) {
-          return '핵심 정보는 보강하고 불필요한 표현은 정리해, 전체 안내 흐름이 자연스럽게 이어지도록 구조를 개선했습니다.';
-        }
-        if (addedCount > 0) {
-          return '사용자가 놓치기 쉬운 정보를 보완해, 주요 안내를 처음 읽을 때도 맥락을 쉽게 파악할 수 있도록 개선했습니다.';
-        }
-        if (deletedCount > 0) {
-          return '중복되거나 우선순위가 낮은 문구를 줄여, 중요한 정보가 더 먼저 보이도록 정보 밀도를 조정했습니다.';
-        }
-        return 'Before와 After의 의미 차이가 크지 않아 기존 의도를 유지하면서 문구 일관성만 점검했습니다.';
-      }
+      compareBtn.onclick = () => {
+        const snapshotA = getSnapshotById(snapshotASelectEl.value);
+        const snapshotB = getSnapshotById(snapshotBSelectEl.value);
 
-      summarizeBtn.onclick = () => {
-        const beforeText = beforeEl.value || '';
-        const afterText = afterEl.value || '';
-        const currentIntent = (intentEl.value || '').trim();
+        if (!snapshotA || !snapshotB) {
+          showToast('비교할 스냅샷 A와 B를 모두 선택해주세요.', true);
+          return;
+        }
+
+        if (snapshotA.id === snapshotB.id) {
+          showToast('서로 다른 스냅샷 2개를 선택해주세요.', true);
+          return;
+        }
+
+        const beforeText = snapshotA.texts.join('\n');
+        const afterText = snapshotB.texts.join('\n');
         inputPageEl.style.display = 'none';
         resultPageEl.style.display = 'block';
         resultSectionEl.style.display = 'block';
@@ -463,13 +594,18 @@
           )
           .join('');
 
-        const autoIntent = makeAutoIntent(added.length, changed.length, deleted.length);
-        const finalIntent = currentIntent ? polishIntent(currentIntent) : autoIntent;
-        intentResultEl.value = finalIntent;
+        snapshotCompareInfoEl.innerHTML = `
+          <div style="font-weight: 600; margin-bottom: 6px;">비교 대상</div>
+          <div style="font-size: 12px; margin-bottom: 4px;">A: ${escapeHtml(
+            makeSnapshotOptionLabel(snapshotA)
+          )}</div>
+          <div style="font-size: 12px;">B: ${escapeHtml(makeSnapshotOptionLabel(snapshotB))}</div>
+        `;
 
         latestResult = {
           summary: resultSummaryEl.textContent,
-          intent: finalIntent,
+          snapshotA,
+          snapshotB,
           added,
           changed,
           deleted,
@@ -481,7 +617,7 @@
           showToast('먼저 "변경 내용 요약하기"를 눌러 결과를 만들어주세요.', true);
           return;
         }
-        showToast('피그마 페이지에 기록하는 중...');
+        showToast('로그 페이지에 기록하는 중...');
         parent.postMessage({ pluginMessage: { type: 'save-log', payload: latestResult } }, '*');
       };
 
@@ -490,27 +626,29 @@
         const msg = event.data.pluginMessage;
         if (!msg) return;
 
+        if (msg.type === 'snapshots-loaded') {
+          updateSnapshotUI(msg.snapshots || []);
+          saveStatusEl.textContent = `최근 ${Math.min((msg.snapshots || []).length, 10)}개의 스냅샷을 불러왔어요.`;
+          return;
+        }
+
+        if (msg.type === 'save-snapshot-result') {
+          if (msg.ok) {
+            snapshotMemoEl.value = '';
+            updateSnapshotUI(msg.snapshots || []);
+          }
+          saveStatusEl.textContent = msg.message || (msg.ok ? '저장 완료' : '저장 실패');
+          showToast(saveStatusEl.textContent, !msg.ok);
+          return;
+        }
+
         if (msg.type === 'save-log-result') {
           showToast(msg.message || (msg.ok ? '저장 완료' : '저장 실패'), !msg.ok);
           return;
         }
-
-        if (msg.type !== 'selected-text') return;
-
-        if (msg.error) {
-          // 결과 영역은 "요약 버튼" 클릭 전까지는 보여주지 않는다.
-          return;
-        }
-
-        if (!msg.texts || msg.texts.length === 0) {
-          // 결과 영역은 "요약 버튼" 클릭 전까지는 보여주지 않는다.
-          return;
-        }
-
-        const text = msg.texts.join('\\n\\n');
-        if (msg.target === 'before') beforeEl.value = text;
-        if (msg.target === 'after') afterEl.value = text;
       };
+
+      requestSnapshots();
     </script>
   </body>
 </html>

@@ -1,0 +1,44 @@
+---
+pid: 41152
+cwd: /Users/areumlee/Downloads/chAInge.note example
+last_command: |
+  git remote add origin https://github.com/너아이디/change-note-plugin.git
+last_exit_code: 0
+---
+areumlee@ialeum-ui-iMac chAInge.note example % gin init
+zsh: command not found: gin
+areumlee@ialeum-ui-iMac chAInge.note example % git init
+Initialized empty Git repository in /Users/areumlee/Downloads/chAInge.note example/.git/
+areumlee@ialeum-ui-iMac chAInge.note example % git add
+Nothing specified, nothing added.
+hint: Maybe you wanted to say 'git add .'?
+hint: Turn this message off by running
+hint: "git config advice.addEmptyPathspec false"
+areumlee@ialeum-ui-iMac chAInge.note example % git add .
+areumlee@ialeum-ui-iMac chAInge.note example % git commit -m "init: figma plugin base"
+[main (root-commit) 705ec6b] init: figma plugin base
+ Committer: 이아름 <areumlee@ialeum-ui-iMac.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 9 files changed, 2390 insertions(+)
+ create mode 100644 .gitignore
+ create mode 100644 README.md
+ create mode 100644 code.ts
+ create mode 100644 eslint.config.js
+ create mode 100644 manifest.json
+ create mode 100644 package-lock.json
+ create mode 100644 package.json
+ create mode 100644 tsconfig.json
+ create mode 100644 ui.html
+areumlee@ialeum-ui-iMac chAInge.note example % git remote add origin https://github.com/너아이디/change-note-plugin.git
+areumlee@ialeum-ui-iMac chAInge.note example %

@@ -2,13 +2,18 @@
 // 이 파일 안에서는 `figma` 전역 객체를 통해 현재 페이지, 선택된 노드 등에 접근할 수 있다.
 
 figma.showUI(__html__, {
-  width: 420,
-  height: 640,
+  width: 592,
+  height: 755,
 });
 
 const LOG_PAGE_NAME = 'chAInge.note Logs';
 const SNAPSHOT_STORAGE_KEY = 'change-note-snapshots';
 const MAX_SNAPSHOTS = 10;
+
+type TextEntry = {
+  text: string;
+  nodeId: string;
+};
 
 type Snapshot = {
   id: string;
@@ -16,24 +21,32 @@ type Snapshot = {
   frameName: string;
   memo: string;
   texts: string[];
+  textEntries?: TextEntry[];
+  containerNodeId?: string;
+};
+
+type LogSnapshotRef = {
+  createdAt: string;
+  frameName: string;
+  memo: string;
 };
 
 type CompareResult = {
   summary: string;
-  snapshotA: Snapshot;
-  snapshotB: Snapshot;
+  snapshotA: LogSnapshotRef;
+  snapshotB: LogSnapshotRef;
   added: string[];
   changed: { before: string; after: string }[];
   deleted: string[];
 };
 
 // 선택한 "컨테이너"(프레임/그룹/섹션 등) 안의 텍스트들을 모은다.
-function collectTextInContainer(container: SceneNode): string[] {
-  const texts: string[] = [];
+function collectTextEntries(container: SceneNode): TextEntry[] {
+  const entries: TextEntry[] = [];
 
   function walk(node: SceneNode) {
     if (node.type === 'TEXT') {
-      texts.push((node as TextNode).characters);
+      entries.push({ text: (node as TextNode).characters, nodeId: node.id });
     } else if ('children' in node) {
       for (const child of node.children as readonly SceneNode[]) {
         walk(child);
@@ -42,7 +55,46 @@ function collectTextInContainer(container: SceneNode): string[] {
   }
 
   walk(container);
-  return texts;
+  return entries;
+}
+
+function normalizeSnapshot(item: Snapshot): Snapshot {
+  if (Array.isArray(item.textEntries) && item.textEntries.length > 0) {
+    return item;
+  }
+
+  return {
+    id: item.id,
+    createdAt: item.createdAt,
+    frameName: item.frameName,
+    memo: item.memo,
+    texts: item.texts || [],
+    textEntries: (item.texts || []).map((text) => ({ text, nodeId: '' })),
+    containerNodeId: item.containerNodeId,
+  };
+}
+
+async function focusTextNode(nodeId: string): Promise<void> {
+  if (!nodeId) {
+    throw new Error('이 스냅샷에는 위치 정보가 없어요. 프레임을 다시 저장해주세요.');
+  }
+
+  await figma.loadAllPagesAsync();
+  const node = await figma.getNodeByIdAsync(nodeId);
+  if (!node || node.removed || node.type !== 'TEXT') {
+    throw new Error('텍스트 레이어를 찾지 못했어요. 삭제되었거나 문서에서 이동했을 수 있어요.');
+  }
+
+  let parent: BaseNode | null = node.parent;
+  while (parent && parent.type !== 'PAGE') {
+    parent = parent.parent;
+  }
+  if (parent && parent.type === 'PAGE') {
+    await figma.setCurrentPageAsync(parent);
+  }
+
+  figma.currentPage.selection = [node];
+  figma.viewport.scrollAndZoomIntoView([node]);
 }
 
 function formatDateTime(date: Date): string {
@@ -59,16 +111,18 @@ async function loadSnapshots(): Promise<Snapshot[]> {
   const saved = await figma.clientStorage.getAsync(SNAPSHOT_STORAGE_KEY);
   if (!Array.isArray(saved)) return [];
 
-  return saved.filter((item): item is Snapshot => {
-    return (
-      item &&
-      typeof item.id === 'string' &&
-      typeof item.createdAt === 'string' &&
-      typeof item.frameName === 'string' &&
-      typeof item.memo === 'string' &&
-      Array.isArray(item.texts)
-    );
-  });
+  return saved
+    .filter((item): item is Snapshot => {
+      return (
+        item &&
+        typeof item.id === 'string' &&
+        typeof item.createdAt === 'string' &&
+        typeof item.frameName === 'string' &&
+        typeof item.memo === 'string' &&
+        Array.isArray(item.texts)
+      );
+    })
+    .map(normalizeSnapshot);
 }
 
 async function saveSnapshots(snapshots: Snapshot[]): Promise<void> {
@@ -86,8 +140,11 @@ async function saveCurrentSnapshot(memo: string): Promise<Snapshot> {
     throw new Error('텍스트가 들어있는 프레임, 그룹, 섹션 또는 텍스트 레이어를 선택해야 해요.');
   }
 
-  const texts = target.type === 'TEXT' ? [target.characters] : collectTextInContainer(target);
-  if (texts.length === 0) {
+  const textEntries =
+    target.type === 'TEXT'
+      ? [{ text: target.characters, nodeId: target.id }]
+      : collectTextEntries(target);
+  if (textEntries.length === 0) {
     throw new Error('선택한 프레임 안에서 텍스트를 찾지 못했어요.');
   }
 
@@ -96,11 +153,15 @@ async function saveCurrentSnapshot(memo: string): Promise<Snapshot> {
     createdAt: new Date().toISOString(),
     frameName: target.name || '이름 없는 프레임',
     memo: memo.trim(),
-    texts,
+    texts: textEntries.map((entry) => entry.text),
+    textEntries,
+    containerNodeId: target.id,
   };
 
   const snapshots = await loadSnapshots();
-  await saveSnapshots([snapshot, ...snapshots]);
+  const nextSnapshots = snapshots.slice();
+  nextSnapshots.unshift(snapshot);
+  await saveSnapshots(nextSnapshots);
   return snapshot;
 }
 
@@ -129,10 +190,6 @@ function formatDateOnly(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}.${month}.${day}`;
-}
-
-function joinTexts(texts: string[]): string {
-  return texts.join('\n');
 }
 
 type DiffSegment = {
@@ -210,7 +267,15 @@ async function createLogCard(payload: CompareResult): Promise<void> {
   frame.paddingBottom = 12;
   frame.cornerRadius = 8;
   frame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-  frame.strokes = [{ type: 'SOLID', color: { r: 0.87, g: 0.87, b: 0.87 } }];
+  frame.strokes = [{ type: 'SOLID', color: { r: 0.87, g: 0.87, b: 0.87 } }]; // #dedede
+
+  const LOG_COLORS = {
+    boxBg: { r: 0.98, g: 0.98, b: 0.98 }, // #fafafa
+    boxBorder: { r: 0.92, g: 0.92, b: 0.92 }, // #ebebeb
+    text: { r: 0.11, g: 0.11, b: 0.11 }, // #1c1c1c
+    del: { r: 0.71, g: 0.14, b: 0.09 }, // #b52417
+    add: { r: 0.12, g: 0.48, b: 0.12 }, // #1f7a1f
+  };
 
   function makeCell(text: string, width: number, bold = false, size = 12): TextNode {
     const t = figma.createText();
@@ -235,7 +300,7 @@ async function createLogCard(payload: CompareResult): Promise<void> {
     t.characters = fullText;
 
     if (fullText.length > 0) {
-      t.setRangeFills(0, fullText.length, [{ type: 'SOLID', color: { r: 0.11, g: 0.11, b: 0.11 } }]);
+      t.setRangeFills(0, fullText.length, [{ type: 'SOLID', color: LOG_COLORS.text }]);
     }
 
     let cursor = 0;
@@ -254,7 +319,7 @@ async function createLogCard(payload: CompareResult): Promise<void> {
     return t;
   }
 
-  function makeInfoBox(title: string, body: string, detail?: string): FrameNode {
+  function makeInfoBox(title: string, body: string): FrameNode {
     const box = figma.createFrame();
     box.layoutMode = 'VERTICAL';
     box.primaryAxisSizingMode = 'AUTO';
@@ -266,16 +331,16 @@ async function createLogCard(payload: CompareResult): Promise<void> {
     box.paddingBottom = 12;
     box.resize(424, 100);
     box.cornerRadius = 6;
-    box.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
-    box.strokes = [{ type: 'SOLID', color: { r: 0.92, g: 0.92, b: 0.92 } }];
+    box.fills = [{ type: 'SOLID', color: LOG_COLORS.boxBg }];
+    box.strokes = [{ type: 'SOLID', color: LOG_COLORS.boxBorder }];
     box.appendChild(makeCell(title, 400, true));
     box.appendChild(makeCell(body, 400));
-    if (detail) {
-      const detailText = makeCell(detail, 400, false, 11);
-      detailText.fills = [{ type: 'SOLID', color: { r: 0.45, g: 0.45, b: 0.45 } }];
-      box.appendChild(detailText);
-    }
     return box;
+  }
+
+  function formatSnapshotLine(snapshot: LogSnapshotRef): string {
+    const label = snapshot.memo || snapshot.frameName;
+    return `${label} | ${snapshot.frameName} | ${formatDateTime(new Date(snapshot.createdAt))}`;
   }
 
   function makeDiffCard(beforeSegments: DiffSegment[], afterSegments: DiffSegment[]): FrameNode {
@@ -290,8 +355,8 @@ async function createLogCard(payload: CompareResult): Promise<void> {
     card.paddingBottom = 12;
     card.resize(860, 100);
     card.cornerRadius = 6;
-    card.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
-    card.strokes = [{ type: 'SOLID', color: { r: 0.92, g: 0.92, b: 0.92 } }];
+    card.fills = [{ type: 'SOLID', color: LOG_COLORS.boxBg }];
+    card.strokes = [{ type: 'SOLID', color: LOG_COLORS.boxBorder }];
     card.appendChild(makeCell('Before', 836, true, 11));
     card.appendChild(makeStyledText(beforeSegments, 836));
     card.appendChild(makeCell('After', 836, true, 11));
@@ -315,30 +380,14 @@ async function createLogCard(payload: CompareResult): Promise<void> {
   compareInfoFrame.fills = [];
   compareInfoFrame.strokes = [];
   compareInfoFrame.resize(860, 100);
-  compareInfoFrame.appendChild(
-    makeInfoBox(
-      '비교 대상 A',
-      `${payload.snapshotA.memo || payload.snapshotA.frameName} | ${payload.snapshotA.frameName} | ${formatDateTime(
-        new Date(payload.snapshotA.createdAt)
-      )}`,
-      joinTexts(payload.snapshotA.texts)
-    )
-  );
-  compareInfoFrame.appendChild(
-    makeInfoBox(
-      '비교 대상 B',
-      `${payload.snapshotB.memo || payload.snapshotB.frameName} | ${payload.snapshotB.frameName} | ${formatDateTime(
-        new Date(payload.snapshotB.createdAt)
-      )}`,
-      joinTexts(payload.snapshotB.texts)
-    )
-  );
+  compareInfoFrame.appendChild(makeInfoBox('비교 대상 A', formatSnapshotLine(payload.snapshotA)));
+  compareInfoFrame.appendChild(makeInfoBox('비교 대상 B', formatSnapshotLine(payload.snapshotB)));
   frame.appendChild(compareInfoFrame);
 
   if (payload.added.length > 0) {
     frame.appendChild(makeSectionTitle(`추가 ${payload.added.length}건`));
     for (const line of payload.added) {
-      frame.appendChild(makeDiffCard([], [{ text: line, color: { r: 0.12, g: 0.48, b: 0.12 } }]));
+      frame.appendChild(makeDiffCard([], [{ text: line, color: LOG_COLORS.add }]));
     }
   }
   if (payload.changed.length > 0) {
@@ -351,7 +400,7 @@ async function createLogCard(payload: CompareResult): Promise<void> {
   if (payload.deleted.length > 0) {
     frame.appendChild(makeSectionTitle(`삭제 ${payload.deleted.length}건`));
     for (const line of payload.deleted) {
-      frame.appendChild(makeDiffCard([{ text: line, color: { r: 0.71, g: 0.14, b: 0.09 }, strike: true }], []));
+      frame.appendChild(makeDiffCard([{ text: line, color: LOG_COLORS.del, strike: true }], []));
     }
   }
 
@@ -360,8 +409,22 @@ async function createLogCard(payload: CompareResult): Promise<void> {
 
 // UI(html)에서 보내는 메시지를 받는 부분
 figma.ui.onmessage = async (
-  msg: { type: string; memo?: string; payload?: CompareResult }
+  msg: {
+    type: string;
+    memo?: string;
+    nodeId?: string;
+    width?: number;
+    height?: number;
+    payload?: CompareResult;
+  }
 ) => {
+  if (msg.type === 'resize-ui') {
+    const width = typeof msg.width === 'number' ? msg.width : 400;
+    const height = typeof msg.height === 'number' ? msg.height : 200;
+    figma.ui.resize(width, Math.max(120, Math.min(Math.round(height), 1200)));
+    return;
+  }
+
   if (msg.type === 'save-snapshot') {
     try {
       const snapshot = await saveCurrentSnapshot(msg.memo || '');
@@ -382,10 +445,36 @@ figma.ui.onmessage = async (
   }
 
   if (msg.type === 'get-snapshots') {
-    figma.ui.postMessage({
-      type: 'snapshots-loaded',
-      snapshots: await loadSnapshots(),
-    });
+    try {
+      figma.ui.postMessage({
+        type: 'snapshots-loaded',
+        snapshots: await loadSnapshots(),
+      });
+    } catch (error) {
+      figma.ui.postMessage({
+        type: 'snapshots-loaded',
+        snapshots: [],
+        message:
+          error instanceof Error ? error.message : '스냅샷 목록을 불러오지 못했어요.',
+      });
+    }
+  }
+
+  if (msg.type === 'focus-text-node') {
+    try {
+      await focusTextNode(msg.nodeId || '');
+      figma.ui.postMessage({
+        type: 'focus-text-node-result',
+        ok: true,
+        message: '해당 텍스트 레이어로 이동했어요.',
+      });
+    } catch (error) {
+      figma.ui.postMessage({
+        type: 'focus-text-node-result',
+        ok: false,
+        message: error instanceof Error ? error.message : '레이어로 이동하지 못했어요.',
+      });
+    }
   }
 
   if (msg.type === 'save-log') {

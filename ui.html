@@ -3,181 +3,768 @@
   <head>
     <meta charset="utf-8" />
     <style>
+      :root {
+        --primary: #9c40ff;
+        --primary-hover: #8a35e6;
+        --border: #e2e5ec;
+        --text: #202127;
+        --text-muted: #5f6472;
+        --text-placeholder: #9ca3af;
+        --bg: #ffffff;
+        --bg-subtle: #f7f8fa;
+        --bg-selected: #f8f7fc;
+        --danger: #e5484d;
+        --danger-bg: #fff1f2;
+        --success: #12a150;
+        --success-bg: #e8f8ee;
+        --radius: 4px;
+        --plugin-width: 592px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        margin: 0;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
       body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        margin: 16px;
+        margin: 0;
+        min-height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
-      h2 {
-        margin-top: 0;
-        margin-bottom: 6px;
+
+      body {
+        font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        padding: 48px;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 14px;
+        line-height: 1.5;
+        width: var(--plugin-width);
       }
+
+      .logo {
+        display: block;
+        height: 32px;
+        width: auto;
+        max-width: 100%;
+        margin: 0;
+        object-fit: contain;
+      }
+
+      .title-section {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+        margin-bottom: 0;
+      }
+
       .subtitle {
-        font-size: 12px;
-        color: #555;
-        margin: 0 0 14px;
-        line-height: 1.4;
+        font-size: 16px;
+        color: var(--text-muted);
+        margin: 12px 0 0;
+        word-break: break-word;
       }
-      .divider {
-        height: 1px;
-        background: #eee;
-        margin: 14px 0;
-      }
+
       .section {
-        margin-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+        padding: 24px 0 32px;
       }
-      .card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
+
+      .section:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 0 0 16px;
+        line-height: 1.5;
+        color: var(--text);
+      }
+
+      .section-header {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 16px;
+      }
+
+      .section-header .section-title {
+        margin: 0;
+      }
+
+      .section-desc {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 400;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .field-label {
+        display: block;
+        font-size: 14px;
+        color: var(--text-muted);
+        margin: 0;
+      }
+
+      .field-block {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      input[type='text'] {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0 16px;
+        height: 40px;
+        font-size: 14px;
+        font-family: inherit;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      input[type='text']::placeholder {
+        color: var(--text-placeholder);
+      }
+
+      input[type='text']:focus {
+        outline: none;
+        border-color: var(--primary);
+      }
+
+      button {
+        font-family: inherit;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: var(--radius);
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        color: inherit;
+        line-height: 1.5;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+      }
+
+      .btn-outline-primary {
+        width: 100%;
+        height: 44px;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+        background: var(--bg);
         padding: 10px;
-        background: #fafafa;
       }
-      .row {
+
+      .btn-outline-primary:hover:not(:disabled) {
+        background: var(--bg-selected);
+      }
+
+      .btn-secondary {
+        flex-shrink: 0;
+        height: 40px;
+        padding: 8px 16px;
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 400;
+        white-space: nowrap;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: var(--bg-selected);
+      }
+
+      .btn-compare {
+        width: 100%;
+        height: 44px;
+        padding: 10px;
+        margin-top: 48px;
+        color: #fff;
+        background: var(--primary);
+        opacity: 0.4;
+      }
+
+      .btn-compare.is-active {
+        opacity: 1;
+      }
+
+      .btn-compare.is-active:hover {
+        background: var(--primary-hover);
+      }
+
+      .btn-primary-full {
+        width: 100%;
+        height: 44px;
+        padding: 10px;
+        color: #fff;
+        background: var(--primary);
+        margin-top: 48px;
+      }
+
+      .btn-primary-full:hover {
+        background: var(--primary-hover);
+      }
+
+      .status {
+        margin-top: 8px;
+        width: 100%;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text-muted);
+        text-align: center;
+      }
+
+      .status:empty {
+        display: none;
+        margin-top: 0;
+      }
+
+      .snapshot-block {
+        margin-bottom: 16px;
+      }
+
+      .snapshot-block:last-child {
+        margin-bottom: 0;
+      }
+
+      .snapshot-block-label {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin: 0 0 4px;
+      }
+
+      .snapshot-row {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .snapshot-pick-area {
+        flex: 1;
+        min-width: 0;
+        height: 40px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        background: var(--bg);
+      }
+
+      .snapshot-placeholder {
+        color: var(--text-placeholder);
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .snapshot-selected {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .snapshot-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .snapshot-selected-memo {
+        font-weight: 700;
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex-shrink: 1;
+        min-width: 0;
+      }
+
+      .meta-divider {
+        width: 1px;
+        height: 12px;
+        background: var(--border);
+        flex-shrink: 0;
+      }
+
+      .snapshot-selected-date {
+        font-size: 16px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .btn-icon {
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+      }
+
+      .btn-icon:hover {
+        color: var(--text);
+      }
+
+      .btn-icon svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+
+      .btn-clear {
+        width: 24px;
+        height: 24px;
+        color: var(--text-placeholder);
+      }
+
+      .btn-clear:hover {
+        color: #7b8290;
+      }
+
+      .btn-clear svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+
+      .modal-overlay.is-open {
+        display: flex;
+      }
+
+      .modal {
+        width: 100%;
+        max-width: 544px;
+        max-height: 544px;
+        height: 544px;
+        background: var(--bg);
+        border-radius: var(--radius);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding: 24px;
+        gap: 24px;
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .modal-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      .modal-desc {
+        margin: 4px 0 0;
+        font-size: 16px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .btn-close-wrap {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        padding: 0;
+      }
+
+      .modal-body {
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        gap: 0;
+      }
+
+      .modal-list-scroll {
+        flex: 1;
+        min-width: 0;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .modal-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .modal-snapshot-item {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 16px;
+        cursor: pointer;
+        background: var(--bg-subtle);
+      }
+
+      .modal-snapshot-item:hover:not(.is-disabled) {
+        border-color: #ccc;
+      }
+
+      .modal-snapshot-item.is-selected {
+        border-color: var(--primary);
+        background: var(--bg-selected);
+      }
+
+      .modal-snapshot-item.is-disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .modal-snapshot-head {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        min-width: 0;
+      }
+
+      .radio-icon {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        color: var(--text-muted);
+      }
+
+      .modal-snapshot-item.is-selected .radio-icon {
+        color: var(--primary);
+      }
+
+      .modal-snapshot-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+      }
+
+      .modal-snapshot-title {
+        font-size: 16px;
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .modal-snapshot-date {
+        font-size: 16px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .modal-snapshot-frame {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin: 0;
+        word-break: break-word;
+      }
+
+      .modal-snapshot-preview {
+        font-size: 12px;
+        color: var(--text);
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 90px;
+        overflow: hidden;
+        line-height: 1.5;
+      }
+
+      .empty {
+        color: var(--text-muted);
+        font-size: 14px;
+        text-align: center;
+        padding: 24px 8px;
+        line-height: 1.6;
+      }
+
+      /* Result page */
+      .result-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 24px;
+      }
+
+      .btn-back-wrap {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        padding: 0;
+      }
+
+      .btn-back-wrap:hover {
+        color: var(--primary);
+      }
+
+      .result-header-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .result-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.5;
+      }
+
+      .result-subtitle {
+        margin: 4px 0 0;
+        font-size: 16px;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
+
+      .result-section {
+        padding: 24px 0 32px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .result-section:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .compare-targets {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .compare-target-card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 16px;
+      }
+
+      .compare-target-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+
+      .compare-target-line .label {
+        color: var(--primary);
+        font-weight: 700;
+        white-space: nowrap;
+      }
+
+      .compare-target-line .value {
+        color: var(--text);
+        font-weight: 700;
+      }
+
+      .compare-target-line .date {
+        color: var(--text-muted);
+        font-weight: 400;
+        white-space: nowrap;
+      }
+
+      .accordion-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .accordion {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-subtle);
+        overflow: clip;
+      }
+
+      .accordion summary {
+        cursor: pointer;
+        padding: 12px 16px;
+        font-weight: 700;
+        font-size: 16px;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        user-select: none;
+      }
+
+      .accordion summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .accordion-chevron {
+        width: 24px;
+        height: 24px;
+        flex-shrink: 0;
+        color: var(--text);
+        transition: transform 0.15s ease;
+        transform: rotate(-90deg);
+      }
+
+      .accordion[open] .accordion-chevron {
+        transform: rotate(0deg);
+      }
+
+      .accordion-content {
+        padding: 0 16px 12px;
+      }
+
+      .diff-sets {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .diff-set .diff-item {
+        margin-top: 0;
+      }
+
+      .diff-set-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 12px 0;
+        border: none;
+      }
+
+      .diff-item.is-clickable {
+        cursor: pointer;
+      }
+
+      .diff-line-label {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin: 0 0 4px;
+      }
+
+      .diff-line-label.after-label {
+        color: var(--text);
+        margin-top: 12px;
+      }
+
+      .diff-line {
+        white-space: pre-wrap;
+        word-break: break-word;
+        font-size: 14px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 0 16px;
+        min-height: 40px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        margin-bottom: 6px;
       }
-      .label {
-        font-size: 12px;
-        font-weight: 600;
-      }
-      button {
-        padding: 6px 10px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        background: white;
-        cursor: pointer;
-        font-size: 12px;
-      }
-      button:hover {
-        background: #f3f3f3;
-      }
-      button.primary {
-        border-color: #111;
-      }
-      textarea,
-      input[type='text'],
-      select {
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 8px;
-        font-size: 12px;
-      }
-      #result {
-        padding: 8px;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        background: #fafafa;
-        font-size: 12px;
-      }
-      #resultSection {
-        display: none;
-      }
-      .result-summary {
-        font-weight: 600;
-        margin-bottom: 10px;
-      }
-      .result-field {
-        margin-bottom: 8px;
-      }
-      .result-field textarea {
-        background: #fff;
-      }
-      .accordion {
-        margin-bottom: 8px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        background: #fff;
-      }
-      .accordion summary {
-        cursor: pointer;
-        padding: 8px;
-        font-weight: 600;
-        font-size: 12px;
-      }
-      .accordion-content {
-        padding: 0 8px 8px;
-      }
-      .diff-item {
-        border: 1px solid #eee;
-        border-radius: 6px;
-        padding: 8px;
-        margin-top: 8px;
-        background: #fafafa;
-      }
-      .diff-line-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: #555;
-        margin: 4px 0;
-      }
-      .diff-line {
-        white-space: pre-wrap;
-        word-break: break-word;
-        font-size: 12px;
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 4px;
-        padding: 6px;
-      }
-      .hl-add {
-        background: #e6f7e6;
-        color: #1e7a1e;
-        font-weight: 600;
-      }
-      .hl-del {
-        color: #b42318;
-        text-decoration: line-through;
-        background: #ffecec;
-      }
-      .error {
-        color: #c0392b;
-      }
-      .status {
-        margin-top: 8px;
-        font-size: 11px;
-        color: #555;
-      }
-      .snapshot-list {
+
+      .diff-line-content {
+        flex: 1;
+        min-width: 0;
         display: flex;
-        flex-direction: column;
-        gap: 8px;
-        max-height: 180px;
-        overflow: auto;
+        align-items: center;
+        min-height: 21px;
       }
-      .snapshot-item {
-        border: 1px solid #e6e6e6;
-        border-radius: 6px;
-        padding: 8px;
-        background: #fff;
+
+      .diff-goto-icon {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+        color: var(--text-muted);
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .snapshot-title {
-        font-size: 12px;
-        font-weight: 600;
-        margin-bottom: 4px;
+
+      .diff-goto-icon svg {
+        display: block;
+        width: 16px;
+        height: 16px;
       }
-      .snapshot-date {
-        color: #999999;
+
+      .diff-line.diff-empty {
+        color: var(--text-placeholder);
+      }
+
+      .hl-add {
+        background: var(--success-bg);
+        color: var(--success);
         font-weight: 400;
+        padding: 2px 4px;
+        border-radius: 2px;
       }
-      .snapshot-meta {
-        font-size: 11px;
-        color: #666;
-        margin-bottom: 4px;
+
+      .hl-del {
+        color: var(--danger);
+        text-decoration: line-through;
+        background: var(--danger-bg);
+        padding: 2px 4px;
+        border-radius: 2px;
       }
-      .snapshot-text {
-        font-size: 11px;
-        color: #444;
-        white-space: pre-wrap;
-        word-break: break-word;
+
+      .accordion-empty {
+        padding: 4px 0 0;
+        font-size: 14px;
+        color: var(--text-muted);
       }
-      .empty {
-        color: #777;
-        font-size: 12px;
-      }
+
       .toast {
         position: fixed;
         left: 50%;
@@ -186,23 +773,29 @@
         background: #111;
         color: #fff;
         padding: 8px 12px;
-        border-radius: 8px;
+        border-radius: var(--radius);
         font-size: 12px;
+        line-height: 1.5;
+        text-align: center;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
         max-width: calc(100% - 24px);
         z-index: 9999;
       }
+
       .toast.show {
         opacity: 1;
       }
+
       .toast.error {
-        background: #b42318;
+        background: var(--danger);
       }
+
       #inputPage {
         display: block;
       }
+
       #resultPage {
         display: none;
       }
@@ -210,95 +803,142 @@
   </head>
   <body>
     <div id="inputPage">
-      <h2>chAInge.note</h2>
-      <p class="subtitle">현재 선택한 프레임의 텍스트를 스냅샷으로 저장하고, 두 스냅샷을 비교해 변경 로그를 남깁니다.</p>
+      <header class="title-section">
+        <img class="logo" src="data:image/png;base64,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" alt="chAInge.note" height="32" />
+        <p class="subtitle">
+          현재 선택한 프레임의 텍스트를 스냅샷으로 저장하고, 두 스냅샷을 비교해 변경 로그를 남깁니다.
+        </p>
+      </header>
 
-      <div class="divider"></div>
-
-      <div class="section">
-        <div class="row">
-          <div class="label">1. 현재 상태 저장</div>
-        </div>
-        <input
-          id="snapshotMemo"
-          type="text"
-          placeholder="이번 스냅샷 메모를 입력하세요. 예) QA 반영 전, 카피 수정 후"
-        />
-        <button class="primary" id="saveSnapshot" style="margin-top: 8px; width: 100%;">
-          현재 상태 저장
-        </button>
-        <div id="saveStatus" class="status">프레임을 선택한 뒤 저장 버튼을 눌러주세요.</div>
-      </div>
-
-      <div class="section">
-        <div class="row">
-          <div class="label">2. 저장된 스냅샷 목록 (최근 10개)</div>
-          <button id="refreshSnapshots">새로고침</button>
-        </div>
-        <div class="card">
-          <div id="snapshotList" class="snapshot-list"></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="row">
-          <div class="label">3. 비교할 스냅샷 선택</div>
-        </div>
-        <div class="card">
-          <div style="margin-bottom: 8px;">
-            <div class="label" style="margin-bottom: 4px;">Snapshot A</div>
-            <select id="snapshotASelect"></select>
+      <section class="section">
+        <h2 class="section-title">1. 현재 상태 저장</h2>
+        <div class="field-group">
+          <div class="field-block">
+            <label class="field-label" for="snapshotMemo">메모(선택)</label>
+            <input
+              id="snapshotMemo"
+              type="text"
+              placeholder="현재 상태에 대한 메모를 입력하세요. 예) QA 반영 전, 카피 수정 후"
+            />
           </div>
-          <div style="margin-bottom: 8px;">
-            <div class="label" style="margin-bottom: 4px;">Snapshot B</div>
-            <select id="snapshotBSelect"></select>
+          <button class="btn-outline-primary" id="saveSnapshot" type="button">현재 상태 저장</button>
+          <div id="saveStatus" class="status" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2 class="section-title">2. 비교할 스냅샷 선택</h2>
+
+        <div class="snapshot-block">
+          <p class="snapshot-block-label">스냅샷 A</p>
+          <div class="snapshot-row">
+            <div class="snapshot-pick-area" id="snapshotAPick">
+              <span class="snapshot-placeholder">현재 상태 저장 시 우선 선택됩니다.</span>
+            </div>
+            <button class="btn-secondary" id="pickSnapshotA" type="button">스냅샷 선택</button>
           </div>
         </div>
-      </div>
 
-      <button class="primary" id="compareBtn">비교</button>
+        <div class="snapshot-block">
+          <p class="snapshot-block-label">스냅샷 B</p>
+          <div class="snapshot-row">
+            <div class="snapshot-pick-area" id="snapshotBPick">
+              <span class="snapshot-placeholder">비교할 스냅샷을 선택해주세요.</span>
+            </div>
+            <button class="btn-secondary" id="pickSnapshotB" type="button">스냅샷 선택</button>
+          </div>
+        </div>
+      </section>
+
+      <button class="btn-compare" id="compareBtn" type="button" disabled>비교</button>
+    </div>
+
+    <div id="snapshotModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal">
+        <header class="modal-header">
+          <div>
+            <h2 class="modal-title" id="modalTitle">저장된 스냅샷 목록</h2>
+            <p class="modal-desc">스냅샷은 최대 10개까지 저장됩니다.</p>
+          </div>
+          <button class="btn-close-wrap btn-icon" id="closeModal" type="button" aria-label="닫기">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+          </button>
+        </header>
+        <div class="modal-body">
+          <div class="modal-list-scroll">
+            <div id="modalSnapshotList" class="modal-list"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div id="resultPage">
-      <div class="row">
-        <h2 style="margin: 0;">결과</h2>
-        <button id="backToInput">이전으로</button>
-      </div>
-      <p class="subtitle">선택한 두 스냅샷의 텍스트 차이를 비교한 결과입니다.</p>
+      <header class="result-header">
+        <button class="btn-back-wrap btn-icon" id="backToInput" type="button" aria-label="뒤로가기">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M14.5 6.5L9 12l5.5 5.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="result-header-text">
+          <h2 class="result-title">결과</h2>
+          <p class="result-subtitle">선택한 두 스냅샷의 텍스트 차이를 비교한 결과입니다.</p>
+        </div>
+      </header>
 
-      <div class="divider"></div>
+      <section class="result-section">
+        <h3 class="section-title">비교 대상</h3>
+        <div id="snapshotCompareInfo" class="compare-targets"></div>
+      </section>
 
-      <div class="section" id="resultSection">
-        <div id="result">
-          <div id="resultSummary" class="result-summary">추가 0건 | 변경 0건 | 삭제 0건</div>
-
-          <div id="snapshotCompareInfo" class="card" style="margin-bottom: 10px;"></div>
-
+      <section class="result-section">
+        <div class="section-header">
+          <h3 class="section-title">비교 결과</h3>
+          <p class="section-desc">카드를 선택하면 해당 텍스트 레이어로 이동합니다.</p>
+        </div>
+        <div class="accordion-list">
           <details id="addedAccordion" class="accordion">
-            <summary id="addedSummary">추가 0건</summary>
+            <summary id="addedSummary">
+              <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M8 10l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span>추가 0건</span>
+            </summary>
             <div class="accordion-content">
               <div id="addedResult"></div>
             </div>
           </details>
 
           <details id="changedAccordion" class="accordion">
-            <summary id="changedSummary">변경 0건</summary>
+            <summary id="changedSummary">
+              <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M8 10l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span>변경 0건</span>
+            </summary>
             <div class="accordion-content">
               <div id="changedResult"></div>
             </div>
           </details>
 
           <details id="deletedAccordion" class="accordion">
-            <summary id="deletedSummary">삭제 0건</summary>
+            <summary id="deletedSummary">
+              <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M8 10l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span>삭제 0건</span>
+            </summary>
             <div class="accordion-content">
               <div id="deletedResult"></div>
             </div>
           </details>
-
-          <button id="saveToFigma" style="margin-top: 8px; width: 100%;">로그 남기기</button>
         </div>
-      </div>
+      </section>
+
+      <button class="btn-primary-full" id="saveToFigma" type="button">로그 남기기</button>
     </div>
+
     <div id="toast" class="toast"></div>
 
     <script>
@@ -306,17 +946,19 @@
       const resultPageEl = document.getElementById('resultPage');
       const snapshotMemoEl = document.getElementById('snapshotMemo');
       const saveSnapshotBtn = document.getElementById('saveSnapshot');
-      const refreshSnapshotsBtn = document.getElementById('refreshSnapshots');
       const compareBtn = document.getElementById('compareBtn');
       const backToInputBtn = document.getElementById('backToInput');
       const saveToFigmaBtn = document.getElementById('saveToFigma');
       const toastEl = document.getElementById('toast');
       const saveStatusEl = document.getElementById('saveStatus');
-      const snapshotListEl = document.getElementById('snapshotList');
-      const snapshotASelectEl = document.getElementById('snapshotASelect');
-      const snapshotBSelectEl = document.getElementById('snapshotBSelect');
+      const snapshotAPickEl = document.getElementById('snapshotAPick');
+      const snapshotBPickEl = document.getElementById('snapshotBPick');
+      const pickSnapshotABtn = document.getElementById('pickSnapshotA');
+      const pickSnapshotBBtn = document.getElementById('pickSnapshotB');
+      const snapshotModalEl = document.getElementById('snapshotModal');
+      const closeModalBtn = document.getElementById('closeModal');
+      const modalSnapshotListEl = document.getElementById('modalSnapshotList');
       const snapshotCompareInfoEl = document.getElementById('snapshotCompareInfo');
-      const resultSummaryEl = document.getElementById('resultSummary');
       const addedResultEl = document.getElementById('addedResult');
       const changedResultEl = document.getElementById('changedResult');
       const deletedResultEl = document.getElementById('deletedResult');
@@ -326,10 +968,40 @@
       const addedSummaryEl = document.getElementById('addedSummary');
       const changedSummaryEl = document.getElementById('changedSummary');
       const deletedSummaryEl = document.getElementById('deletedSummary');
-      const resultSectionEl = document.getElementById('resultSection');
+
+      const RADIO_CHECKED = `<svg class="radio-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="5" fill="currentColor"/></svg>`;
+      const RADIO_UNCHECKED = `<svg class="radio-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>`;
+      const CANCEL_ICON = `<svg viewBox="0 0 16.6667 16.6667" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M8.33333 0C3.725 0 0 3.725 0 8.33333C0 12.9417 3.725 16.6667 8.33333 16.6667C12.9417 16.6667 16.6667 12.9417 16.6667 8.33333C16.6667 3.725 12.9417 0 8.33333 0ZM12.5 11.325L11.325 12.5L8.33333 9.50833L5.34167 12.5L4.16667 11.325L7.15833 8.33333L4.16667 5.34167L5.34167 4.16667L8.33333 7.15833L11.325 4.16667L12.5 5.34167L9.50833 8.33333L12.5 11.325Z" fill="currentColor"/></svg>`;
+      const MY_LOCATION_ICON = `<span class="diff-goto-icon" aria-hidden="true"><svg viewBox="0 0 14.6667 14.6667" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7.33333 4.66667C5.86 4.66667 4.66667 5.86 4.66667 7.33333C4.66667 8.80667 5.86 10 7.33333 10C8.80667 10 10 8.80667 10 7.33333C10 5.86 8.80667 4.66667 7.33333 4.66667ZM13.2933 6.66667C12.9867 3.88667 10.78 1.68 8 1.37333V0H6.66667V1.37333C3.88667 1.68 1.68 3.88667 1.37333 6.66667H0V8H1.37333C1.68 10.78 3.88667 12.9867 6.66667 13.2933V14.6667H8V13.2933C10.78 12.9867 12.9867 10.78 13.2933 8H14.6667V6.66667H13.2933ZM7.33333 12C4.75333 12 2.66667 9.91333 2.66667 7.33333C2.66667 4.75333 4.75333 2.66667 7.33333 2.66667C9.91333 2.66667 12 4.75333 12 7.33333C12 9.91333 9.91333 12 7.33333 12Z" fill="currentColor"/></svg></span>`;
+
       let latestResult = null;
       let snapshots = [];
       let toastTimer = null;
+      let selectedSnapshotAId = '';
+      let selectedSnapshotBId = '';
+      let modalTarget = 'A';
+      let modalSelectedId = '';
+      const PLUGIN_WIDTH = 592;
+      const MAX_PLUGIN_HEIGHT = 755;
+      const MIN_PLUGIN_HEIGHT = 120;
+
+      function resizePluginWindow() {
+        const contentHeight = Math.ceil(document.documentElement.scrollHeight);
+        const height = Math.max(
+          MIN_PLUGIN_HEIGHT,
+          Math.min(contentHeight, MAX_PLUGIN_HEIGHT)
+        );
+        parent.postMessage(
+          { pluginMessage: { type: 'resize-ui', width: PLUGIN_WIDTH, height } },
+          '*'
+        );
+      }
+
+      function scheduleResize() {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(resizePluginWindow);
+        });
+      }
 
       function requestSnapshots() {
         parent.postMessage({ pluginMessage: { type: 'get-snapshots' } }, '*');
@@ -356,99 +1028,271 @@
         return `${year}.${month}.${day} ${hours}:${minutes}`;
       }
 
-      function makeSnapshotOptionLabel(snapshot) {
-        const primaryLabel = snapshot.memo || snapshot.frameName;
-        return `${primaryLabel} | ${formatSnapshotDate(snapshot.createdAt)}`;
+      function getSnapshotLabel(snapshot) {
+        return snapshot.memo || snapshot.frameName;
       }
 
-      function renderSnapshotList() {
-        if (!snapshots.length) {
-          snapshotListEl.innerHTML = '<div class="empty">아직 저장된 스냅샷이 없어요.</div>';
+      function escapeHtml(text) {
+        return String(text == null ? '' : text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function getSnapshotById(snapshotId) {
+        return snapshots.find((snapshot) => snapshot.id === snapshotId) || null;
+      }
+
+      function renderSelectedSlot(pickEl, snapshotId, placeholderText, onClear) {
+        const snapshot = getSnapshotById(snapshotId);
+        if (!snapshot) {
+          pickEl.innerHTML = `<span class="snapshot-placeholder">${escapeHtml(placeholderText)}</span>`;
           return;
         }
 
-        snapshotListEl.innerHTML = snapshots
+        pickEl.innerHTML = `
+          <div class="snapshot-selected">
+            <div class="snapshot-meta">
+              <span class="snapshot-selected-memo">${escapeHtml(getSnapshotLabel(snapshot))}</span>
+              <span class="meta-divider" aria-hidden="true"></span>
+              <span class="snapshot-selected-date">${escapeHtml(formatSnapshotDate(snapshot.createdAt))}</span>
+            </div>
+            <button class="btn-icon btn-clear" type="button" aria-label="선택 해제">${CANCEL_ICON}</button>
+          </div>
+        `;
+
+        pickEl.querySelector('.btn-clear').onclick = (event) => {
+          event.stopPropagation();
+          onClear();
+          updateCompareButtonState();
+          scheduleResize();
+        };
+      }
+
+      function updateCompareButtonState() {
+        const canCompare =
+          selectedSnapshotAId &&
+          selectedSnapshotBId &&
+          selectedSnapshotAId !== selectedSnapshotBId;
+        compareBtn.disabled = !canCompare;
+        compareBtn.classList.toggle('is-active', canCompare);
+      }
+
+      function renderSnapshotSlots() {
+        renderSelectedSlot(
+          snapshotAPickEl,
+          selectedSnapshotAId,
+          '현재 상태 저장 시 우선 선택됩니다.',
+          () => {
+            selectedSnapshotAId = '';
+          }
+        );
+        renderSelectedSlot(
+          snapshotBPickEl,
+          selectedSnapshotBId,
+          '비교할 스냅샷을 선택해주세요.',
+          () => {
+            selectedSnapshotBId = '';
+          }
+        );
+        updateCompareButtonState();
+      }
+
+      function renderModalList() {
+        if (!snapshots.length) {
+          modalSnapshotListEl.innerHTML =
+            '<div class="empty">아직 저장된 스냅샷이 없어요.<br />먼저 현재 상태를 저장해주세요.</div>';
+          return;
+        }
+
+        const otherSelectedId = modalTarget === 'A' ? selectedSnapshotBId : selectedSnapshotAId;
+
+        modalSnapshotListEl.innerHTML = snapshots
           .map((snapshot) => {
-            const preview = snapshot.texts.join('\n').slice(0, 140);
-            const primaryLabel = snapshot.memo || snapshot.frameName;
+            const preview = snapshot.texts.join('\n').slice(0, 200);
+            const primaryLabel = getSnapshotLabel(snapshot);
+            const isSelected = snapshot.id === modalSelectedId;
+            const isDisabled = snapshot.id === otherSelectedId;
             return `
-              <div class="snapshot-item">
-                <div class="snapshot-title">
-                  ${escapeHtml(primaryLabel)}
-                  <span class="snapshot-date">| ${escapeHtml(formatSnapshotDate(snapshot.createdAt))}</span>
-                </div>
-                <div class="snapshot-meta">${escapeHtml(snapshot.frameName)}</div>
-                <div class="snapshot-text">${escapeHtml(preview)}${
-                  preview.length >= 140 ? '...' : ''
-                }</div>
-              </div>
+              <article
+                class="modal-snapshot-item${isSelected ? ' is-selected' : ''}${isDisabled ? ' is-disabled' : ''}"
+                data-id="${escapeHtml(snapshot.id)}"
+                role="button"
+                tabindex="${isDisabled ? '-1' : '0'}"
+                aria-disabled="${isDisabled ? 'true' : 'false'}"
+              >
+                <header class="modal-snapshot-head">
+                  ${isSelected ? RADIO_CHECKED : RADIO_UNCHECKED}
+                  <div class="modal-snapshot-meta">
+                    <span class="modal-snapshot-title">${escapeHtml(primaryLabel)}</span>
+                    <span class="meta-divider" aria-hidden="true"></span>
+                    <span class="modal-snapshot-date">${escapeHtml(formatSnapshotDate(snapshot.createdAt))}</span>
+                  </div>
+                </header>
+                <p class="modal-snapshot-frame">${escapeHtml(snapshot.frameName)}</p>
+                <p class="modal-snapshot-preview">${escapeHtml(preview)}${preview.length >= 200 ? '...' : ''}</p>
+              </article>
             `;
           })
           .join('');
+
+        modalSnapshotListEl.querySelectorAll('.modal-snapshot-item').forEach((item) => {
+          if (item.classList.contains('is-disabled')) return;
+
+          const activate = () => {
+            const snapshotId = item.getAttribute('data-id');
+            modalSelectedId = snapshotId;
+            if (modalTarget === 'A') {
+              selectedSnapshotAId = snapshotId;
+            } else {
+              selectedSnapshotBId = snapshotId;
+            }
+            closeModal();
+            renderSnapshotSlots();
+            scheduleResize();
+          };
+
+          item.onclick = activate;
+          item.onkeydown = (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              activate();
+            }
+          };
+        });
       }
 
-      function renderSnapshotSelects() {
-        const placeholder = '<option value="">스냅샷을 선택하세요</option>';
-        const options = snapshots
-          .map(
-            (snapshot) =>
-              `<option value="${escapeHtml(snapshot.id)}">${escapeHtml(makeSnapshotOptionLabel(snapshot))}</option>`
-          )
-          .join('');
+      function openModal(target) {
+        modalTarget = target;
+        modalSelectedId = target === 'A' ? selectedSnapshotAId : selectedSnapshotBId;
+        renderModalList();
+        snapshotModalEl.classList.add('is-open');
+      }
 
-        snapshotASelectEl.innerHTML = placeholder + options;
-        snapshotBSelectEl.innerHTML = placeholder + options;
-
-        if (snapshots.length >= 1) snapshotASelectEl.value = snapshots[0].id;
-        if (snapshots.length >= 2) snapshotBSelectEl.value = snapshots[1].id;
+      function closeModal() {
+        snapshotModalEl.classList.remove('is-open');
       }
 
       function updateSnapshotUI(nextSnapshots) {
         snapshots = Array.isArray(nextSnapshots) ? nextSnapshots : [];
-        renderSnapshotList();
-        renderSnapshotSelects();
+
+        if (selectedSnapshotAId && !getSnapshotById(selectedSnapshotAId)) {
+          selectedSnapshotAId = '';
+        }
+        if (selectedSnapshotBId && !getSnapshotById(selectedSnapshotBId)) {
+          selectedSnapshotBId = '';
+        }
+
+        renderSnapshotSlots();
+        if (snapshotModalEl.classList.contains('is-open')) {
+          renderModalList();
+        }
+        scheduleResize();
       }
 
-      saveSnapshotBtn.onclick = () => {
-        saveStatusEl.textContent = '선택한 프레임의 텍스트를 저장하는 중...';
-        parent.postMessage(
-          {
-            pluginMessage: {
-              type: 'save-snapshot',
-              memo: snapshotMemoEl.value || '',
+      if (pickSnapshotABtn) pickSnapshotABtn.onclick = () => openModal('A');
+      if (pickSnapshotBBtn) pickSnapshotBBtn.onclick = () => openModal('B');
+      if (closeModalBtn) closeModalBtn.onclick = closeModal;
+      if (snapshotModalEl) {
+        snapshotModalEl.onclick = (event) => {
+          if (event.target === snapshotModalEl) closeModal();
+        };
+      }
+
+      if (saveSnapshotBtn) {
+        saveSnapshotBtn.onclick = () => {
+          saveStatusEl.textContent = '선택한 프레임의 텍스트를 저장하는 중...';
+          parent.postMessage(
+            {
+              pluginMessage: {
+                type: 'save-snapshot',
+                memo: snapshotMemoEl.value || '',
+              },
             },
-          },
-          '*'
-        );
-      };
-
-      refreshSnapshotsBtn.onclick = () => {
-        saveStatusEl.textContent = '저장된 스냅샷 목록을 불러오는 중...';
-        requestSnapshots();
-      };
-
-      backToInputBtn.onclick = () => {
-        resultPageEl.style.display = 'none';
-        inputPageEl.style.display = 'block';
-      };
-
-      function normalizeLines(text) {
-        return text
-          .split(/\r?\n/)
-          .map((l) => l.trim())
-          .filter((l) => l.length > 0);
+            '*'
+          );
+        };
       }
 
-      function escapeHtml(text) {
-        return text
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#39;');
+      if (backToInputBtn) {
+        backToInputBtn.onclick = () => {
+          resultPageEl.style.display = 'none';
+          inputPageEl.style.display = 'block';
+          scheduleResize();
+        };
       }
 
-      // 단순한 prefix/suffix 기반 하이라이트 (초보자용 간단 버전)
+      function getTextEntries(snapshot) {
+        if (Array.isArray(snapshot.textEntries) && snapshot.textEntries.length > 0) {
+          return snapshot.textEntries;
+        }
+        return (snapshot.texts || []).map((text) => ({ text, nodeId: '' }));
+      }
+
+      function focusTextNode(nodeId) {
+        if (!nodeId) {
+          showToast('이 스냅샷에는 위치 정보가 없어요. 프레임을 다시 저장해주세요.', true);
+          return;
+        }
+        parent.postMessage({ pluginMessage: { type: 'focus-text-node', nodeId } }, '*');
+      }
+
+      function makeDiffLineWithIcon(innerHtml) {
+        return `
+          <div class="diff-line">
+            <div class="diff-line-content">${innerHtml}</div>
+            ${MY_LOCATION_ICON}
+          </div>
+        `;
+      }
+
+      function makeDiffItemHtml(nodeId, contentHtml) {
+        if (!nodeId) {
+          return `<div class="diff-item">${contentHtml}</div>`;
+        }
+        return `
+          <div
+            class="diff-item is-clickable"
+            data-node-id="${escapeHtml(nodeId)}"
+            title="클릭하면 Figma에서 해당 텍스트로 이동"
+            role="button"
+            tabindex="0"
+          >
+            ${contentHtml}
+          </div>
+        `;
+      }
+
+      function joinDiffSets(itemHtmlList) {
+        if (!itemHtmlList.length) return '';
+        return `<div class="diff-sets">${itemHtmlList
+          .map((html, index) => {
+            const divider =
+              index < itemHtmlList.length - 1
+                ? '<div class="diff-set-divider" role="separator" aria-hidden="true"></div>'
+                : '';
+            return `<div class="diff-set">${html}</div>${divider}`;
+          })
+          .join('')}</div>`;
+      }
+
+      function bindDiffItemClicks(container) {
+        if (!container) return;
+        container.querySelectorAll('.diff-item.is-clickable').forEach((item) => {
+          const nodeId = item.getAttribute('data-node-id');
+          const activate = () => focusTextNode(nodeId);
+          item.onclick = activate;
+          item.onkeydown = (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              activate();
+            }
+          };
+        });
+      }
+
       function makeInlineDiff(beforeLine, afterLine) {
         if (beforeLine === afterLine) {
           return {
@@ -489,152 +1333,259 @@
         return { beforeHtml, afterHtml };
       }
 
-      function summarizeChanges(beforeText, afterText) {
-        const beforeLines = normalizeLines(beforeText);
-        const afterLines = normalizeLines(afterText);
+      function summarizeChangesByIndex(entriesA, entriesB) {
         const added = [];
         const changed = [];
         const deleted = [];
-        const max = Math.max(beforeLines.length, afterLines.length);
+        const max = Math.max(entriesA.length, entriesB.length);
 
         for (let i = 0; i < max; i++) {
-          const beforeLine = beforeLines[i];
-          const afterLine = afterLines[i];
+          const entryA = entriesA[i];
+          const entryB = entriesB[i];
+          const beforeText = entryA ? entryA.text.trim() : '';
+          const afterText = entryB ? entryB.text.trim() : '';
 
-          if (beforeLine !== undefined && afterLine !== undefined) {
-            if (beforeLine !== afterLine) {
-              changed.push({ before: beforeLine, after: afterLine });
+          if (entryA && entryB) {
+            if (beforeText !== afterText && (beforeText || afterText)) {
+              changed.push({
+                before: beforeText,
+                after: afterText,
+                nodeId: entryB.nodeId || entryA.nodeId || '',
+              });
             }
-          } else if (beforeLine === undefined && afterLine !== undefined) {
-            added.push(afterLine);
-          } else if (beforeLine !== undefined && afterLine === undefined) {
-            deleted.push(beforeLine);
+          } else if (!entryA && entryB && afterText) {
+            added.push({ text: afterText, nodeId: entryB.nodeId || '' });
+          } else if (entryA && !entryB && beforeText) {
+            deleted.push({ text: beforeText, nodeId: entryA.nodeId || '' });
           }
         }
 
         return { added, changed, deleted };
       }
 
-      function getSnapshotById(snapshotId) {
-        return snapshots.find((snapshot) => snapshot.id === snapshotId) || null;
+      function summarizeChangesByNodeId(entriesA, entriesB) {
+        const added = [];
+        const changed = [];
+        const deleted = [];
+        const mapA = new Map();
+        const mapB = new Map();
+
+        entriesA.forEach((entry) => {
+          if (entry.nodeId) mapA.set(entry.nodeId, entry);
+        });
+        entriesB.forEach((entry) => {
+          if (entry.nodeId) mapB.set(entry.nodeId, entry);
+        });
+
+        mapB.forEach((entryB, nodeId) => {
+          const entryA = mapA.get(nodeId);
+          const afterText = entryB.text.trim();
+          if (!entryA) {
+            if (afterText) added.push({ text: afterText, nodeId });
+            return;
+          }
+          const beforeText = entryA.text.trim();
+          if (beforeText !== afterText && (beforeText || afterText)) {
+            changed.push({ before: beforeText, after: afterText, nodeId });
+          }
+        });
+
+        mapA.forEach((entryA, nodeId) => {
+          if (mapB.has(nodeId)) return;
+          const beforeText = entryA.text.trim();
+          if (beforeText) deleted.push({ text: beforeText, nodeId });
+        });
+
+        return { added, changed, deleted };
       }
 
-      compareBtn.onclick = () => {
-        const snapshotA = getSnapshotById(snapshotASelectEl.value);
-        const snapshotB = getSnapshotById(snapshotBSelectEl.value);
+      function summarizeChanges(snapshotA, snapshotB) {
+        const entriesA = getTextEntries(snapshotA);
+        const entriesB = getTextEntries(snapshotB);
+        const canMatchByNodeId =
+          entriesA.some((entry) => entry.nodeId) && entriesB.some((entry) => entry.nodeId);
 
-        if (!snapshotA || !snapshotB) {
-          showToast('비교할 스냅샷 A와 B를 모두 선택해주세요.', true);
-          return;
+        if (canMatchByNodeId) {
+          return summarizeChangesByNodeId(entriesA, entriesB);
         }
 
-        if (snapshotA.id === snapshotB.id) {
-          showToast('서로 다른 스냅샷 2개를 선택해주세요.', true);
-          return;
-        }
+        return summarizeChangesByIndex(entriesA, entriesB);
+      }
 
-        const beforeText = snapshotA.texts.join('\n');
-        const afterText = snapshotB.texts.join('\n');
-        inputPageEl.style.display = 'none';
-        resultPageEl.style.display = 'block';
-        resultSectionEl.style.display = 'block';
-
-        const { added, changed, deleted } = summarizeChanges(beforeText, afterText);
-
-        resultSummaryEl.textContent = `추가 ${added.length}건 | 변경 ${changed.length}건 | 삭제 ${deleted.length}건`;
-        addedSummaryEl.textContent = `추가 ${added.length}건`;
-        changedSummaryEl.textContent = `변경 ${changed.length}건`;
-        deletedSummaryEl.textContent = `삭제 ${deleted.length}건`;
-
-        addedAccordionEl.style.display = added.length > 0 ? 'block' : 'none';
-        changedAccordionEl.style.display = changed.length > 0 ? 'block' : 'none';
-        deletedAccordionEl.style.display = deleted.length > 0 ? 'block' : 'none';
-
-        addedAccordionEl.open = added.length > 0;
-        changedAccordionEl.open = changed.length > 0;
-        deletedAccordionEl.open = deleted.length > 0;
-
-        addedResultEl.innerHTML = added
-          .map(
-            (line) => `
-            <div class="diff-item">
-              <div class="diff-line-label">Before</div>
-              <div class="diff-line"></div>
-              <div class="diff-line-label">After</div>
-              <div class="diff-line"><span class="hl-add">${escapeHtml(line)}</span></div>
-            </div>
-          `
-          )
-          .join('');
-
-        changedResultEl.innerHTML = changed
-          .map((item) => {
-            const diff = makeInlineDiff(item.before, item.after);
-            return `
-              <div class="diff-item">
-                <div class="diff-line-label">Before</div>
-                <div class="diff-line">${diff.beforeHtml}</div>
-                <div class="diff-line-label">After</div>
-                <div class="diff-line">${diff.afterHtml}</div>
-              </div>
-            `;
-          })
-          .join('');
-
-        deletedResultEl.innerHTML = deleted
-          .map(
-            (line) => `
-            <div class="diff-item">
-              <div class="diff-line-label">Before</div>
-              <div class="diff-line"><span class="hl-del">${escapeHtml(line)}</span></div>
-              <div class="diff-line-label">After</div>
-              <div class="diff-line"></div>
-            </div>
-          `
-          )
-          .join('');
-
+      function renderCompareTargets(snapshotA, snapshotB) {
         snapshotCompareInfoEl.innerHTML = `
-          <div style="font-weight: 600; margin-bottom: 6px;">비교 대상</div>
-          <div style="font-size: 12px; margin-bottom: 4px;">A: ${escapeHtml(
-            makeSnapshotOptionLabel(snapshotA)
-          )}</div>
-          <div style="font-size: 12px;">B: ${escapeHtml(makeSnapshotOptionLabel(snapshotB))}</div>
+          <div class="compare-target-card">
+            <div class="compare-target-line">
+              <span class="label">스냅샷 A :</span>
+              <span class="value">${escapeHtml(getSnapshotLabel(snapshotA))}</span>
+              <span class="meta-divider" aria-hidden="true"></span>
+              <span class="date">${escapeHtml(formatSnapshotDate(snapshotA.createdAt))}</span>
+            </div>
+          </div>
+          <div class="compare-target-card">
+            <div class="compare-target-line">
+              <span class="label">스냅샷 B :</span>
+              <span class="value">${escapeHtml(getSnapshotLabel(snapshotB))}</span>
+              <span class="meta-divider" aria-hidden="true"></span>
+              <span class="date">${escapeHtml(formatSnapshotDate(snapshotB.createdAt))}</span>
+            </div>
+          </div>
         `;
+      }
 
-        latestResult = {
-          summary: resultSummaryEl.textContent,
-          snapshotA,
-          snapshotB,
-          added,
-          changed,
-          deleted,
-        };
-      };
-
-      saveToFigmaBtn.onclick = () => {
-        if (!latestResult) {
-          showToast('먼저 "변경 내용 요약하기"를 눌러 결과를 만들어주세요.', true);
-          return;
+      function updateAccordionSummary(summaryEl, label, count) {
+        const textSpan = summaryEl.querySelector('span:last-child');
+        if (textSpan) {
+          textSpan.textContent = `${label} ${count}건`;
         }
-        showToast('로그 페이지에 기록하는 중...');
-        parent.postMessage({ pluginMessage: { type: 'save-log', payload: latestResult } }, '*');
-      };
+      }
 
-      // Figma(코드.ts)에서 보내는 메시지 받기
-      onmessage = (event) => {
+      function renderAccordionResults(added, changed, deleted) {
+        updateAccordionSummary(addedSummaryEl, '추가', added.length);
+        updateAccordionSummary(changedSummaryEl, '변경', changed.length);
+        updateAccordionSummary(deletedSummaryEl, '삭제', deleted.length);
+
+        addedAccordionEl.open = false;
+        changedAccordionEl.open = false;
+        deletedAccordionEl.open = false;
+
+        if (added.length === 0) {
+          addedResultEl.innerHTML = '<p class="accordion-empty">추가된 항목이 없습니다.</p>';
+        } else {
+          addedResultEl.innerHTML = joinDiffSets(
+            added.map((item) =>
+              makeDiffItemHtml(
+                item.nodeId,
+                `
+                <p class="diff-line-label">Before</p>
+                <div class="diff-line diff-empty">—</div>
+                <p class="diff-line-label after-label">After</p>
+                ${makeDiffLineWithIcon(`<span class="hl-add">${escapeHtml(item.text)}</span>`)}
+              `
+              )
+            )
+          );
+        }
+
+        if (changed.length === 0) {
+          changedResultEl.innerHTML = '<p class="accordion-empty">변경된 항목이 없습니다.</p>';
+        } else {
+          changedResultEl.innerHTML = joinDiffSets(
+            changed.map((item) => {
+              const diff = makeInlineDiff(item.before, item.after);
+              return makeDiffItemHtml(
+                item.nodeId,
+                `
+                  <p class="diff-line-label">Before</p>
+                  <div class="diff-line">${diff.beforeHtml}</div>
+                  <p class="diff-line-label after-label">After</p>
+                  ${makeDiffLineWithIcon(diff.afterHtml)}
+                `
+              );
+            })
+          );
+        }
+
+        if (deleted.length === 0) {
+          deletedResultEl.innerHTML = '<p class="accordion-empty">삭제된 항목이 없습니다.</p>';
+        } else {
+          deletedResultEl.innerHTML = joinDiffSets(
+            deleted.map((item) =>
+              makeDiffItemHtml(
+                item.nodeId,
+                `
+                <p class="diff-line-label">Before</p>
+                ${makeDiffLineWithIcon(`<span class="hl-del">${escapeHtml(item.text)}</span>`)}
+                <p class="diff-line-label after-label">After</p>
+                <div class="diff-line diff-empty">—</div>
+              `
+              )
+            )
+          );
+        }
+
+        bindDiffItemClicks(addedResultEl);
+        bindDiffItemClicks(changedResultEl);
+        bindDiffItemClicks(deletedResultEl);
+
+        scheduleResize();
+      }
+
+      [addedAccordionEl, changedAccordionEl, deletedAccordionEl].forEach((accordionEl) => {
+        if (!accordionEl) return;
+        accordionEl.addEventListener('toggle', scheduleResize);
+      });
+
+      if (compareBtn) {
+        compareBtn.onclick = () => {
+          const snapshotA = getSnapshotById(selectedSnapshotAId);
+          const snapshotB = getSnapshotById(selectedSnapshotBId);
+
+          if (!snapshotA || !snapshotB) {
+            showToast('비교할 스냅샷 A와 B를 모두 선택해주세요.', true);
+            return;
+          }
+
+          if (snapshotA.id === snapshotB.id) {
+            showToast('서로 다른 스냅샷 2개를 선택해주세요.', true);
+            return;
+          }
+
+          const { added, changed, deleted } = summarizeChanges(snapshotA, snapshotB);
+
+          renderCompareTargets(snapshotA, snapshotB);
+          renderAccordionResults(added, changed, deleted);
+
+          latestResult = {
+            summary: `추가 ${added.length}건 | 변경 ${changed.length}건 | 삭제 ${deleted.length}건`,
+            snapshotA: {
+              memo: snapshotA.memo,
+              frameName: snapshotA.frameName,
+              createdAt: snapshotA.createdAt,
+            },
+            snapshotB: {
+              memo: snapshotB.memo,
+              frameName: snapshotB.frameName,
+              createdAt: snapshotB.createdAt,
+            },
+            added: added.map((item) => item.text),
+            changed: changed.map((item) => ({ before: item.before, after: item.after })),
+            deleted: deleted.map((item) => item.text),
+          };
+
+          inputPageEl.style.display = 'none';
+          resultPageEl.style.display = 'block';
+          scheduleResize();
+        };
+      }
+
+      if (saveToFigmaBtn) {
+        saveToFigmaBtn.onclick = () => {
+          if (!latestResult) {
+            showToast('먼저 비교를 실행해 결과를 만들어주세요.', true);
+            return;
+          }
+          showToast('로그 페이지에 기록하는 중...');
+          parent.postMessage({ pluginMessage: { type: 'save-log', payload: latestResult } }, '*');
+        };
+      }
+
+      window.onmessage = (event) => {
         const msg = event.data.pluginMessage;
         if (!msg) return;
 
         if (msg.type === 'snapshots-loaded') {
           updateSnapshotUI(msg.snapshots || []);
-          saveStatusEl.textContent = `최근 ${Math.min((msg.snapshots || []).length, 10)}개의 스냅샷을 불러왔어요.`;
+          if (msg.message) showToast(msg.message, true);
           return;
         }
 
         if (msg.type === 'save-snapshot-result') {
           if (msg.ok) {
             snapshotMemoEl.value = '';
+            if (msg.snapshot && msg.snapshot.id) {
+              selectedSnapshotAId = msg.snapshot.id;
+            }
             updateSnapshotUI(msg.snapshots || []);
           }
           saveStatusEl.textContent = msg.message || (msg.ok ? '저장 완료' : '저장 실패');
@@ -646,9 +1597,22 @@
           showToast(msg.message || (msg.ok ? '저장 완료' : '저장 실패'), !msg.ok);
           return;
         }
+
+        if (msg.type === 'focus-text-node-result') {
+          if (!msg.ok) {
+            showToast(msg.message || '레이어로 이동하지 못했어요.', true);
+          }
+          return;
+        }
       };
 
       requestSnapshots();
+      scheduleResize();
+
+      if (typeof ResizeObserver !== 'undefined') {
+        const resizeObserver = new ResizeObserver(scheduleResize);
+        resizeObserver.observe(document.body);
+      }
     </script>
   </body>
 </html>

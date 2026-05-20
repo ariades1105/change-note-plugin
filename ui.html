@@ -1333,83 +1333,85 @@
         return { beforeHtml, afterHtml };
       }
 
-      function summarizeChangesByIndex(entriesA, entriesB) {
+      function summarizeChangesByIndex(entriesBefore, entriesAfter) {
         const added = [];
         const changed = [];
         const deleted = [];
-        const max = Math.max(entriesA.length, entriesB.length);
+        const max = Math.max(entriesBefore.length, entriesAfter.length);
 
         for (let i = 0; i < max; i++) {
-          const entryA = entriesA[i];
-          const entryB = entriesB[i];
-          const beforeText = entryA ? entryA.text.trim() : '';
-          const afterText = entryB ? entryB.text.trim() : '';
+          const entryBefore = entriesBefore[i];
+          const entryAfter = entriesAfter[i];
+          const beforeText = entryBefore ? entryBefore.text.trim() : '';
+          const afterText = entryAfter ? entryAfter.text.trim() : '';
 
-          if (entryA && entryB) {
+          if (entryBefore && entryAfter) {
             if (beforeText !== afterText && (beforeText || afterText)) {
               changed.push({
                 before: beforeText,
                 after: afterText,
-                nodeId: entryB.nodeId || entryA.nodeId || '',
+                nodeId: entryAfter.nodeId || entryBefore.nodeId || '',
               });
             }
-          } else if (!entryA && entryB && afterText) {
-            added.push({ text: afterText, nodeId: entryB.nodeId || '' });
-          } else if (entryA && !entryB && beforeText) {
-            deleted.push({ text: beforeText, nodeId: entryA.nodeId || '' });
+          } else if (!entryBefore && entryAfter && afterText) {
+            added.push({ text: afterText, nodeId: entryAfter.nodeId || '' });
+          } else if (entryBefore && !entryAfter && beforeText) {
+            deleted.push({ text: beforeText, nodeId: entryBefore.nodeId || '' });
           }
         }
 
         return { added, changed, deleted };
       }
 
-      function summarizeChangesByNodeId(entriesA, entriesB) {
+      function summarizeChangesByNodeId(entriesBefore, entriesAfter) {
         const added = [];
         const changed = [];
         const deleted = [];
-        const mapA = new Map();
-        const mapB = new Map();
+        const mapBefore = new Map();
+        const mapAfter = new Map();
 
-        entriesA.forEach((entry) => {
-          if (entry.nodeId) mapA.set(entry.nodeId, entry);
+        entriesBefore.forEach((entry) => {
+          if (entry.nodeId) mapBefore.set(entry.nodeId, entry);
         });
-        entriesB.forEach((entry) => {
-          if (entry.nodeId) mapB.set(entry.nodeId, entry);
+        entriesAfter.forEach((entry) => {
+          if (entry.nodeId) mapAfter.set(entry.nodeId, entry);
         });
 
-        mapB.forEach((entryB, nodeId) => {
-          const entryA = mapA.get(nodeId);
-          const afterText = entryB.text.trim();
-          if (!entryA) {
+        mapAfter.forEach((entryAfter, nodeId) => {
+          const entryBefore = mapBefore.get(nodeId);
+          const afterText = entryAfter.text.trim();
+          if (!entryBefore) {
             if (afterText) added.push({ text: afterText, nodeId });
             return;
           }
-          const beforeText = entryA.text.trim();
+          const beforeText = entryBefore.text.trim();
           if (beforeText !== afterText && (beforeText || afterText)) {
             changed.push({ before: beforeText, after: afterText, nodeId });
           }
         });
 
-        mapA.forEach((entryA, nodeId) => {
-          if (mapB.has(nodeId)) return;
-          const beforeText = entryA.text.trim();
+        mapBefore.forEach((entryBefore, nodeId) => {
+          if (mapAfter.has(nodeId)) return;
+          const beforeText = entryBefore.text.trim();
           if (beforeText) deleted.push({ text: beforeText, nodeId });
         });
 
         return { added, changed, deleted };
       }
 
+      // 스냅샷 B(비교 기준) → 스냅샷 A(현재/최신) 방향으로 diff
       function summarizeChanges(snapshotA, snapshotB) {
-        const entriesA = getTextEntries(snapshotA);
-        const entriesB = getTextEntries(snapshotB);
+        const entriesBefore = getTextEntries(snapshotB);
+        const entriesAfter = getTextEntries(snapshotA);
         const canMatchByNodeId =
-          entriesA.some((entry) => entry.nodeId) && entriesB.some((entry) => entry.nodeId);
+          entriesBefore.some((entry) => entry.nodeId) &&
+          entriesAfter.some((entry) => entry.nodeId);
 
         if (canMatchByNodeId) {
-          return summarizeChangesByNodeId(entriesA, entriesB);
+          return summarizeChangesByNodeId(entriesBefore, entriesAfter);
         }
 
-        return summarizeChangesByIndex(entriesA, entriesB);
+        return summarizeChangesByIndex(entriesBefore, entriesAfter);
       }
 
       function renderCompareTargets(snapshotA, snapshotB) {

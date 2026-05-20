@@ -339,8 +339,12 @@ async function createLogCard(payload: CompareResult): Promise<void> {
   }
 
   function formatSnapshotLine(snapshot: LogSnapshotRef): string {
-    const label = snapshot.memo || snapshot.frameName;
-    return `${label} | ${snapshot.frameName} | ${formatDateTime(new Date(snapshot.createdAt))}`;
+    const date = formatDateTime(new Date(snapshot.createdAt));
+    const memo = snapshot.memo.trim();
+    if (memo && memo !== snapshot.frameName) {
+      return `${memo} | ${snapshot.frameName} | ${date}`;
+    }
+    return `${snapshot.frameName} | ${date}`;
   }
 
   function makeDiffCard(beforeSegments: DiffSegment[], afterSegments: DiffSegment[]): FrameNode {
